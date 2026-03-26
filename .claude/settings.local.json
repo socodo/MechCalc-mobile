@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/Users/anhcu/OneDrive/Máy tính/MechCalc/client -type d -not -path */node_modules*)",
+      "Bash(grep -r \"services\\\\|api\\\\|utils\\\\|store\\\\|context\" '/c/Users/anhcu/OneDrive/Máy tính/MechCalc/client/app' --include=*.ts --include=*.tsx)"
+    ]
+  }
+}
