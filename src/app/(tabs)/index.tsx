@@ -1,98 +1,90 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import React from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
-import { HelloWave } from '@/components/common/hello-wave';
-import ParallaxScrollView from '@/components/common/parallax-scroll-view';
-import { ThemedText } from '@/components/common/themed-text';
-import { ThemedView } from '@/components/common/themed-view';
-import { Link } from 'expo-router';
+import type { QuickItem } from "@/types/quick-item";
 
-export default function HomeScreen() {
+const Index = () => {
+  const quickItems: QuickItem[] = [
+    {
+      title: "Động cơ điện",
+      icon: "settings-outline",
+      color: "#2F80ED",
+      bg: "#EAF2FF",
+      onPress: () => router.push("/(tabs)/calc"),
+    },
+    {
+      title: "Bộ truyền xích",
+      icon: "link-outline",
+      color: "#22C55E",
+      bg: "#E9FBEF",
+      onPress: () => router.push("/(tabs)/calc"),
+    },
+    {
+      title: "Bánh răng",
+      icon: "reader-outline",
+      color: "#F97316",
+      bg: "#FFF2E8",
+      onPress: () => router.push("/(tabs)/calc"),
+    },
+    {
+      title: "Dự án",
+      icon: "folder-outline",
+      color: "#A855F7",
+      bg: "#F6EFFF",
+      onPress: () => router.push("/(tabs)/project"),
+    },
+  ];
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <ScrollView className="flex-1  bg-white" contentContainerStyle={{ paddingBottom: 24, paddingTop: 80 }}>
+      <View className="mx-auto ">
+        <Text className="text-zinc-700 text-3xl font-inter leading-6 tracking-wide">xin chào!</Text>
+        <Text className="text-sky-900  text-3xl font-space-bold  leading-9">Trần Nguyên Anh </Text>
+      </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <View className="px-5 my-10 pt-5">
+        <Text className="text-base font-space uppercase">Truy cập nhanh</Text>
+        <View className="mt-3 flex-row flex-wrap justify-between gap-y-4">
+          {quickItems.map((item, index) => (
+            <TouchableOpacity className="w-[48%] rounded-2xl bg-[#FFFFFF] border p-5" key={index}>
+              <View
+                className="rounded-full"
+                style={{ backgroundColor: item.bg, height: 40, width: 40, alignItems: "center", justifyContent: "center" }}
+              >
+                <Ionicons color={item.color} name={item.icon} size={20} />
+              </View>
+              <Text className="mt-3 text-lg font-inter text-slate-900">{item.title}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      <View className="px-5 pt-2">
+        <View className="flex-row items-center">
+          <Ionicons name="notifications-outline" size={18} color="#11181C" />
+          <Text className="ml-2 text-base font-semibold text-zinc-900">Thông báo</Text>
+        </View>
+
+        <View className="mt-3 gap-3">
+          <View className="rounded-2xl border  bg-white px-4 py-3">
+            <Text className="text-sm font-medium text-zinc-900">
+              Phiên bản 2.0 đã ra mắt với tính năng xuất PDF
+            </Text>
+            <Text className="mt-1 text-xs text-zinc-500">2 giờ trước</Text>
+          </View>
+
+          <View className="rounded-2xl border bg-white px-4 py-3">
+            <Text className="text-sm font-medium text-zinc-900">
+              Dự án &quot;Hộp giảm tốc #3&quot; đã được lưu tự động
+            </Text>
+            <Text className="mt-1 text-xs text-zinc-500">1 ngày trước</Text>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+export default Index;
