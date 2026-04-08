@@ -1,32 +1,33 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
-import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
-import "react-native-reanimated";
+import { Inter_400Regular, Inter_900Black } from '@expo-google-fonts/inter';
+import { SpaceGrotesk_400Regular, SpaceGrotesk_700Bold, useFonts } from '@expo-google-fonts/space-grotesk';
+import { SplashScreen, Stack } from "expo-router";
+import { useEffect } from 'react';
 import "../../global.css";
+SplashScreen.preventAutoHideAsync();
+const _layoutRoot = () => {
+  const [loaded, error] = useFonts({
+    'SpaceGrotesk-Regular': SpaceGrotesk_400Regular,
+    'SpaceGrotesk-Bold': SpaceGrotesk_700Bold,
+    'Inter-Regular': Inter_400Regular,
+    'Inter-Black': Inter_900Black,
+  });
 
-import { useColorScheme } from "@/hooks/use-color-scheme";
+  useEffect(() => {
+    if (loaded || error) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded, error]);
 
-export const unstable_settings = {
-  anchor: "(tabs)",
-};
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  if (!loaded && !error) {
+    return null;
+  }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="modal"
-          options={{ presentation: "modal", title: "Modal" }}
-        />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
-  );
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)"></Stack.Screen>
+    </Stack>
+
+  )
 }
+
+export default _layoutRoot; 

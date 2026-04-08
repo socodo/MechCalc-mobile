@@ -5,6 +5,14 @@ module.exports = {
   darkMode: "class",
   theme: {
     extend: {
+      fontFamily: {
+        // Tên class: font-inter / font-inter-black / font-space / font-space-bold
+        // Giá trị phải khớp chính xác với key bạn đặt trong useFonts (src/app/_layout.tsx)
+        inter: ["Inter-Regular"],
+        "inter-black": ["Inter-Black"],
+        space: ["SpaceGrotesk-Regular"],
+        "space-bold": ["SpaceGrotesk-Bold"],
+      },
       colors: {
         // Semantic colors - sử dụng CSS variables cho dark mode
         background: "var(--color-background)",
