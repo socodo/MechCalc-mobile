@@ -1,8 +1,13 @@
 import { Inter_400Regular, Inter_900Black } from '@expo-google-fonts/inter';
 import { SpaceGrotesk_400Regular, SpaceGrotesk_700Bold, useFonts } from '@expo-google-fonts/space-grotesk';
-import { SplashScreen, Stack } from "expo-router";
-import { useEffect } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { router, SplashScreen, Stack } from "expo-router";
+import React, { useEffect } from 'react';
+import { Pressable, Text, View } from "react-native";
 import "../../global.css";
+import { runMigrations } from "../db/migrate";
+import { seedMotors4aIfEmpty } from "../db/seed/motor-4a";
+import { seedMotorsDkIfEmpty } from "../db/seed/motor-dk";
 SplashScreen.preventAutoHideAsync();
 const _layoutRoot = () => {
   const [loaded, error] = useFonts({
@@ -13,9 +18,25 @@ const _layoutRoot = () => {
   });
 
   useEffect(() => {
-    if (loaded || error) {
-      SplashScreen.hideAsync();
-    }
+    if (!loaded && !error) return;
+
+    let cancelled = false;
+
+    void (async () => {
+      await SplashScreen.hideAsync();
+      try {
+        await runMigrations();
+      } catch (e) {
+        console.error("[db] migration failed", e);
+      }
+      if (cancelled) return;
+      seedMotorsDkIfEmpty();
+      seedMotors4aIfEmpty();
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [loaded, error]);
 
   if (!loaded && !error) {
@@ -25,6 +46,32 @@ const _layoutRoot = () => {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)"></Stack.Screen>
+      <Stack.Screen
+        name="motor"
+        options={{
+          headerShown: true,
+          headerTitleAlign: "left",
+          headerBackVisible: false,
+          headerLeft: () => null,
+          headerTitle: () => (
+            <View className='flex-row items-center gap-3'>
+              <Pressable
+                onPress={() => router.back()}
+                hitSlop={10}
+                accessibilityRole="button"
+                accessibilityLabel="Quay lại"
+              >
+                <Ionicons name="chevron-back" size={24} color="#11181C" />
+              </Pressable>
+              <View className='bg-[#e8f0fe] p-2 rounded-xl'>
+                <Ionicons name="settings-sharp" size={20} color="#1a73e8" />
+              </View>
+              <Text className='font-space text-2xl font-semibold'>Động cơ điện</Text>
+            </View>
+          ),
+          headerShadowVisible: false,
+        }}
+      />
     </Stack>
 
   )

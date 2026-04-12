@@ -12,7 +12,7 @@ const Index = () => {
       icon: "settings-outline",
       color: "#2F80ED",
       bg: "#EAF2FF",
-      onPress: () => router.push("/(tabs)/calc"),
+      onPress: () => router.push("../motor"),
     },
     {
       title: "Bộ truyền xích",

@@ -15,7 +15,7 @@ const Calc = () => {
       color: "#2F80ED",
       bg: "#EAF2FF",
       desc: "Công suất, mô-men xoắn, tốc độ quay",
-      onPress: () => router.push("/(tabs)/calc"),
+      onPress: () => router.push("../motor"),
     },
     {
       title: "Bộ truyền xích",
@@ -46,7 +46,7 @@ const Calc = () => {
 
         <View>
           {quickItems.map((item, index) => (
-            <TouchableOpacity className="flex-row items-center gap-4 p-5 border rounded-xl mb-5" key={index}>
+            <TouchableOpacity onPress={item.onPress} className="flex-row items-center gap-4 p-5 border rounded-xl mb-5" key={index}>
               <View style={{ backgroundColor: item.bg, height: 40, width: 40, alignItems: "center", justifyContent: "center" }} ><Ionicons size={20} color={item.color} name={item.icon}></Ionicons></View>
               <View>
                 <Text className="text-neutral-600 text-lg font-medium font-inter leading-5">{item.title}</Text>
