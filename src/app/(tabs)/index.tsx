@@ -8,24 +8,10 @@ import type { QuickItem } from "@/types/quick-item";
 const Index = () => {
   const quickItems: QuickItem[] = [
     {
-      title: "Động cơ điện",
-      icon: "settings-outline",
-      color: "#2F80ED",
-      bg: "#EAF2FF",
-      onPress: () => router.push("../motor"),
-    },
-    {
-      title: "Bộ truyền xích",
-      icon: "link-outline",
-      color: "#22C55E",
-      bg: "#E9FBEF",
-      onPress: () => router.push("/(tabs)/calc"),
-    },
-    {
-      title: "Bánh răng",
-      icon: "reader-outline",
-      color: "#F97316",
-      bg: "#FFF2E8",
+      title: "Tính toán",
+      icon: "calculator-outline",
+      color: "#3B82F6",
+      bg: "#EFF6FF",
       onPress: () => router.push("/(tabs)/calc"),
     },
     {
@@ -48,7 +34,7 @@ const Index = () => {
         <Text className="text-base font-space uppercase">Truy cập nhanh</Text>
         <View className="mt-3 flex-row flex-wrap justify-between gap-y-4">
           {quickItems.map((item, index) => (
-            <TouchableOpacity className="w-[48%] rounded-2xl bg-[#FFFFFF] border p-5" key={index}>
+            <TouchableOpacity onPress={item.onPress} className="w-[48%] rounded-2xl bg-[#FFFFFF] border p-5" key={index}>
               <View
                 className="rounded-full"
                 style={{ backgroundColor: item.bg, height: 40, width: 40, alignItems: "center", justifyContent: "center" }}

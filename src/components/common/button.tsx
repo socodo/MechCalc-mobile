@@ -6,7 +6,7 @@ type Props = {
   title: string;
   onPress: () => void;
   icon?: React.ComponentProps<typeof Ionicons>["name"];
-  variant?: "primary" | "danger" | "outline";
+  variant?: "primary" | "danger" | "outline" | "success";
   disabled?: boolean;
 };
 
@@ -16,18 +16,21 @@ export default function Button({ title, onPress, icon, variant = "primary", disa
     primary: "bg-[#0047AB]",
     danger: "bg-red-600",
     outline: "border border-zinc-200 bg-white",
+    success: "bg-[#22c55e]",
   };
 
   const textVariants: Record<NonNullable<Props["variant"]>, string> = {
     primary: "text-white",
     danger: "text-white",
     outline: "text-zinc-900",
+    success: "text-white",
   };
 
   const iconColors: Record<NonNullable<Props["variant"]>, string> = {
     primary: "#ffffff",
     danger: "#ffffff",
     outline: "#111827",
+    success: "#ffffff",
   };
 
   return (

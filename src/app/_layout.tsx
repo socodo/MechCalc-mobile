@@ -9,7 +9,7 @@ import { runMigrations } from "../db/migrate";
 import { seedMotors4aIfEmpty } from "../db/seed/motor-4a";
 import { seedMotorsDkIfEmpty } from "../db/seed/motor-dk";
 SplashScreen.preventAutoHideAsync();
-const _layoutRoot = () => {
+const LayoutRoot = () => {
   const [loaded, error] = useFonts({
     'SpaceGrotesk-Regular': SpaceGrotesk_400Regular,
     'SpaceGrotesk-Bold': SpaceGrotesk_700Bold,
@@ -46,8 +46,35 @@ const _layoutRoot = () => {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)"></Stack.Screen>
+
       <Stack.Screen
-        name="motor"
+        name="chain"
+        options={{
+          headerShown: true,
+          headerTitleAlign: "left",
+          headerBackVisible: false,
+          headerLeft: () => null,
+          headerTitle: () => (
+            <View className='flex-row items-center gap-3'>
+              <Pressable
+                onPress={() => router.back()}
+                hitSlop={10}
+                accessibilityRole="button"
+                accessibilityLabel="Quay lại"
+              >
+                <Ionicons name="chevron-back" size={24} color="#11181C" />
+              </Pressable>
+              <View className='bg-[#e8f0fe] p-2 rounded-xl'>
+                <Ionicons name="link-sharp" size={20} color="#1a73e8" />
+              </View>
+              <Text className='font-space text-2xl font-semibold'>Bộ truyền xích</Text>
+            </View>
+          ),
+          headerShadowVisible: false,
+        }}
+      />
+      <Stack.Screen
+        name="gear"
         options={{
           headerShown: true,
           headerTitleAlign: "left",
@@ -66,15 +93,13 @@ const _layoutRoot = () => {
               <View className='bg-[#e8f0fe] p-2 rounded-xl'>
                 <Ionicons name="settings-sharp" size={20} color="#1a73e8" />
               </View>
-              <Text className='font-space text-2xl font-semibold'>Động cơ điện</Text>
+              <Text className='font-space text-2xl font-semibold'>Bộ truyền bánh răng</Text>
             </View>
           ),
           headerShadowVisible: false,
         }}
       />
-    </Stack>
-
-  )
+    </Stack>  )
 }
 
-export default _layoutRoot; 
+export default LayoutRoot; 

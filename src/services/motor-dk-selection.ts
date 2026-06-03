@@ -77,19 +77,51 @@ export function selectMotorDkStep4(
   return ranked[0] ?? null;
 }
 
-/**
- * Bước 4: Lấy **nhiều** ứng viên (mặc định 2 máy đứng đầu, cùng tiêu chí xếp hạng).
- * Mảng có thể có 0 hoặc 1 phần tử nếu catalog không đủ máy thỏa điều kiện.
- */
 export function selectMotorDkStep4Top(
   motors: MotorDkRow[],
   P_ct: number,
   n_sb: number,
-  count = 2,
+  count = 5,
 ): MotorDkRow[] {
-  const n = Math.max(0, Math.floor(count));
-  if (n === 0) return [];
-  return rankMotorsForStep4(motors, P_ct, n_sb).slice(0, n);
+  const ok = motors.filter((m) => m.powerKw >= P_ct);
+  if (ok.length === 0) return [];
+  
+  // Group by sync speed AND series (IE3, DK, 4A, etc)
+  const getSeries = (model: string) => {
+    if (model.startsWith("IE3")) return "IE3";
+    if (model.startsWith("4A")) return "4A";
+    if (model.startsWith("DK")) return "DK";
+    return "Other";
+  };
+
+  const groups = new Map<string, MotorDkRow[]>();
+  for (const m of ok) {
+    const key = `${m.syncSpeedRpm}-${getSeries(m.model)}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(m);
+  }
+
+  let result: MotorDkRow[] = [];
+  for (const group of groups.values()) {
+    // For each group, find the one with minimum power >= P_ct
+    group.sort((a, b) => {
+      if (a.powerKw !== b.powerKw) return a.powerKw - b.powerKw;
+      return a.model.localeCompare(b.model);
+    });
+    result.push(group[0]);
+  }
+
+  // Sort final results: closest sync speed first, then by power
+  result.sort((a, b) => {
+    const da = Math.abs(a.syncSpeedRpm - n_sb);
+    const db = Math.abs(b.syncSpeedRpm - n_sb);
+    if (da !== db) return da - db;
+    if (a.powerKw !== b.powerKw) return a.powerKw - b.powerKw;
+    return a.model.localeCompare(b.model);
+  });
+
+  // Limit to `count` (default 5 to show multiple series and speeds)
+  return result.slice(0, Math.max(0, count));
 }
 
 // ——— Bước 5: Tỷ số truyền thực tế ———
