@@ -53,11 +53,11 @@ function StepCard({
 
 function StepLine({ label, value, error }: { label: string; value: string; error?: boolean }) {
   return (
-    <View className="flex-row flex-wrap items-baseline justify-between gap-4 border-b border-dashed border-zinc-100 py-1.5 last:border-b-0">
-      <Text className="shrink text-xs font-inter text-zinc-600 leading-5">
+    <View className="flex-row items-start justify-between gap-3 border-b border-dashed border-zinc-100 py-1.5 last:border-b-0">
+      <Text className="flex-1 pr-2 text-xs font-inter text-zinc-600 leading-5">
         {label}
       </Text>
-      <Text className={`text-right text-[13px] font-inter leading-5 ${error ? 'text-red-600 font-inter-black' : 'text-zinc-900'}`} style={{ fontWeight: error ? "bold" : "500", fontFamily: "monospace" }}>
+      <Text className={`shrink-0 text-right text-[13px] font-inter leading-5 ${error ? 'text-red-600 font-inter-black' : 'text-zinc-900'}`} style={{ fontWeight: error ? "bold" : "500", fontFamily: "monospace" }}>
         {value}
       </Text>
     </View>
@@ -274,31 +274,31 @@ export default function GearScreen() {
               <StepLine label="Đường kính trung bình bánh dẫn (dm1)" value={`${fmt(result.dm1, 2)} mm`} />
               <StepLine label="Đường kính trung bình bánh bị dẫn (dm2)" value={`${fmt(result.dm2, 2)} mm`} />
               <StepLine label="Mô-đun pháp trung bình (mnm)" value={fmt(result.step3.mnm, 3)} />
-              <StepLine label="Chiều dài côn ngoài tính lại (Re)" value={`${fmt(result.Re, 2)} mm`} />
-              <StepLine label="Chiều rộng vành răng (b = Kbe × Re)" value={`${fmt(result.b, 2)} mm`} />
+              <StepLine label="Chiều dài côn ngoài tính lại (Re)" value={`${fmt(result.Re, 4)} mm`} />
+              <StepLine label="Chiều rộng vành răng (b = Kbe × Re)" value={`${fmt(result.b, 4)} mm`} />
             </StepCard>
 
             <StepCard step="BƯỚC 4" title="Xác định các góc và thông số hình học">
-              <StepLine label="Góc côn chia bánh dẫn (δ1)" value={`${fmt(result.delta1 * 180 / Math.PI, 2)}°`} />
-              <StepLine label="Góc côn chia bánh bị dẫn (δ2)" value={`${fmt(result.delta2 * 180 / Math.PI, 2)}°`} />
+              <StepLine label="Góc côn chia bánh dẫn (δ1)" value={`${fmt(result.delta1 * 180 / Math.PI, 4)}°`} />
+              <StepLine label="Góc côn chia bánh bị dẫn (δ2)" value={`${fmt(result.delta2 * 180 / Math.PI, 4)}°`} />
               <StepLine label="Số răng tương đương (zvn)" value={fmt(result.step4.z_vn, 2)} />
               <StepLine label="Vận tốc vòng (v)" value={`${fmt(result.v, 2)} m/s`} />
-              <StepLine label="Chiều dài côn trung bình (Rm)" value={`${fmt(result.geometry.Rm, 2)} mm`} />
-              <StepLine label="Đường kính chia ngoài bánh dẫn (de1)" value={`${fmt(result.geometry.de1, 2)} mm`} />
-              <StepLine label="Đường kính chia ngoài bánh bị dẫn (de2)" value={`${fmt(result.geometry.de2, 2)} mm`} />
-              <StepLine label="Chiều cao răng ngoài (he)" value={`${fmt(result.geometry.he, 2)} mm`} />
-              <StepLine label="Chiều cao đầu răng ngoài bánh dẫn (hae1)" value={`${fmt(result.geometry.hae1, 2)} mm`} />
-              <StepLine label="Chiều cao đầu răng ngoài bánh bị dẫn (hae2)" value={`${fmt(result.geometry.hae2, 2)} mm`} />
-              <StepLine label="Chiều cao chân răng ngoài bánh dẫn (hfe1)" value={`${fmt(result.geometry.hfe1, 2)} mm`} />
-              <StepLine label="Chiều cao chân răng ngoài bánh bị dẫn (hfe2)" value={`${fmt(result.geometry.hfe2, 2)} mm`} />
-              <StepLine label="Đường kính đỉnh răng ngoài bánh dẫn (dae1)" value={`${fmt(result.geometry.dae1, 2)} mm`} />
-              <StepLine label="Đường kính đỉnh răng ngoài bánh bị dẫn (dae2)" value={`${fmt(result.geometry.dae2, 2)} mm`} />
-              <StepLine label="Góc chân răng bánh dẫn (θf1)" value={`${fmt(result.geometry.theta_f1 * 180 / Math.PI, 2)}°`} />
-              <StepLine label="Góc chân răng bánh bị dẫn (θf2)" value={`${fmt(result.geometry.theta_f2 * 180 / Math.PI, 2)}°`} />
-              <StepLine label="Góc côn đỉnh bánh dẫn (δa1)" value={`${fmt(result.geometry.delta_a1 * 180 / Math.PI, 2)}°`} />
-              <StepLine label="Góc côn đỉnh bánh bị dẫn (δa2)" value={`${fmt(result.geometry.delta_a2 * 180 / Math.PI, 2)}°`} />
-              <StepLine label="Góc côn đáy bánh dẫn (δf1)" value={`${fmt(result.geometry.delta_f1 * 180 / Math.PI, 2)}°`} />
-              <StepLine label="Góc côn đáy bánh bị dẫn (δf2)" value={`${fmt(result.geometry.delta_f2 * 180 / Math.PI, 2)}°`} />
+              <StepLine label="Chiều dài côn trung bình (Rm)" value={`${fmt(result.geometry.Rm, 4)} mm`} />
+              <StepLine label="Đường kính chia ngoài bánh dẫn (de1)" value={`${fmt(result.geometry.de1, 0)} mm`} />
+              <StepLine label="Đường kính chia ngoài bánh bị dẫn (de2)" value={`${fmt(result.geometry.de2, 0)} mm`} />
+              <StepLine label="Chiều cao răng ngoài (he)" value={`${fmt(result.geometry.he, 1)} mm`} />
+              <StepLine label="Chiều cao đầu răng ngoài bánh dẫn (hae1)" value={`${fmt(result.geometry.hae1, 3)} mm`} />
+              <StepLine label="Chiều cao đầu răng ngoài bánh bị dẫn (hae2)" value={`${fmt(result.geometry.hae2, 3)} mm`} />
+              <StepLine label="Chiều cao chân răng ngoài bánh dẫn (hfe1)" value={`${fmt(result.geometry.hfe1, 3)} mm`} />
+              <StepLine label="Chiều cao chân răng ngoài bánh bị dẫn (hfe2)" value={`${fmt(result.geometry.hfe2, 3)} mm`} />
+              <StepLine label="Đường kính đỉnh răng ngoài bánh dẫn (dae1)" value={`${fmt(result.geometry.dae1, 4)} mm`} />
+              <StepLine label="Đường kính đỉnh răng ngoài bánh bị dẫn (dae2)" value={`${fmt(result.geometry.dae2, 4)} mm`} />
+              <StepLine label="Góc chân răng bánh dẫn (θf1)" value={`${fmt(result.geometry.theta_f1 * 180 / Math.PI, 4)}°`} />
+              <StepLine label="Góc chân răng bánh bị dẫn (θf2)" value={`${fmt(result.geometry.theta_f2 * 180 / Math.PI, 4)}°`} />
+              <StepLine label="Góc côn đỉnh bánh dẫn (δa1)" value={`${fmt(result.geometry.delta_a1 * 180 / Math.PI, 4)}°`} />
+              <StepLine label="Góc côn đỉnh bánh bị dẫn (δa2)" value={`${fmt(result.geometry.delta_a2 * 180 / Math.PI, 4)}°`} />
+              <StepLine label="Góc côn đáy bánh dẫn (δf1)" value={`${fmt(result.geometry.delta_f1 * 180 / Math.PI, 4)}°`} />
+              <StepLine label="Góc côn đáy bánh bị dẫn (δf2)" value={`${fmt(result.geometry.delta_f2 * 180 / Math.PI, 4)}°`} />
             </StepCard>
 
             <StepCard step="BƯỚC 5" title="Kiểm nghiệm độ bền tiếp xúc">
@@ -324,8 +324,8 @@ export default function GearScreen() {
               <StepLine label="Hệ số phân bố tải uốn theo phương tiếp tuyến (KFα)" value={fmt(result.step6.K_Falpha, 2)} />
               <StepLine label="Hệ số phân bố tải uốn theo chiều rộng (KFβ)" value={fmt(result.step6.K_Fbeta, 2)} />
               <StepLine label="Vận tốc tải trọng động uốn (vF)" value={fmt(result.step6.v_F, 3)} />
-              <StepLine label="Hệ số tải trọng động uốn (KFv)" value={fmt(result.step6.K_Fv, 3)} />
-              <StepLine label="Hệ số tải trọng uốn (KF)" value={fmt(result.step6.K_F, 3)} />
+              <StepLine label="Hệ số tải trọng động uốn (KFv)" value={fmt(result.step6.K_Fv, 4)} />
+              <StepLine label="Hệ số tải trọng uốn (KF)" value={fmt(result.step6.K_F, 4)} />
               <StepLine label="Giá trị cho phép uốn bánh dẫn ([σF1])" value={`${fmt(result.allowable_sigma_F1, 4)} MPa`} />
               <StepLine label="Giá trị tính toán uốn bánh dẫn (σF1)" value={`${fmt(result.sigma_F1, 4)} MPa`} error={!result.step6.isBending1Valid} />
               <StepLine label="Kết quả bánh 1" value={result.step6.isBending1Valid ? "ĐẠT" : "KHÔNG ĐẠT"} error={!result.step6.isBending1Valid} />

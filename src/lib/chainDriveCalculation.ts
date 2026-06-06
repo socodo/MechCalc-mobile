@@ -226,7 +226,7 @@ export function calculateChainDrive(
   const s = Q / (k_d * F_t + F_v + F_o);
   const isStrengthValid = s >= s_min;
 
-  const F_vd = 13 * Math.pow(10, -7) * n * Math.pow(p_c, 3) * m;
+  const F_vd = 13 * Math.pow(10, -7) * z1 * Math.pow(p_c, 3) * m;
   const sigma = 0.47 * Math.sqrt((k_r * (F_t * k_d + F_vd) * E) / (A * K_d));
   const isContactValid = sigma <= sigma_H_max;
 

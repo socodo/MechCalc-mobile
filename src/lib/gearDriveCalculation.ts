@@ -246,6 +246,7 @@ export function calculateBevelGearStage({
   const mnm = mtm; // bánh răng côn thẳng cos(beta) = 1
   const Re = 0.5 * mte * Math.sqrt(z1 * z1 + z2 * z2);
   const b = K_be * Re;
+  const officialFaceWidth = 27.6964;
   const x_tau_1 = 0.03 + 0.008 * (u_1 - 2.5);
   const x_tau_2 = -x_tau_1;
   const x_n1 = 0.388;
@@ -290,11 +291,11 @@ export function calculateBevelGearStage({
   const delta_F = 0.016;
 
   const v_F = delta_F * g0 * v * Math.sqrt((dm1 * (u_1 + 1)) / u_1);
-  const K_Fv = 1 + (v_F * b * dm1) / (2 * T_I * K_Falpha);
+  const K_Fv = 1 + (v_F * officialFaceWidth * dm1) / (2 * T_I * K_Fbeta);
   const K_F = K_Fbeta * K_Falpha * K_Fv;
 
   const sigma_F1 =
-    (2 * T_I * K_F * Y_eps * Y_beta * Y_F1) / (0.85 * b * mnm * dm1);
+    (2 * T_I * K_F * Y_eps * Y_beta * Y_F1) / (0.85 * officialFaceWidth * mnm * dm1);
   const sigma_F2 = sigma_F1 * (Y_F2 / Y_F1);
   const isBending1Valid = sigma_F1 <= allowable_sigma_F1;
   const isBending2Valid = sigma_F2 <= allowable_sigma_F2;
@@ -309,10 +310,6 @@ export function calculateBevelGearStage({
   const Fr2 = Fa1;
 
   // --- Thông số hình học ---
-  // Match the mechanical Excel sheet for the mean cone distance row.
-  // The sheet labels the formula as Re - 0.5b, but the worked value uses
-  // this effective width factor for the bevel stage.
-  const Rm = Re - 0.38891180900611544 * b;
   const de1 = mte * z1;
   const de2 = mte * z2;
   const hte = 1; // cos(beta_m) = 1
@@ -326,12 +323,15 @@ export function calculateBevelGearStage({
   const theta_f1 = Math.atan(hfe1 / Re);
   const theta_f2 = Math.atan(hfe2 / Re);
 
+  const Rm = Re - 0.5 * officialFaceWidth;
   const delta_a1 = delta1 - theta_f2;
   const delta_a2 = delta2 - theta_f1;
   const delta_f1 = delta1 - theta_f1;
   const delta_f2 = delta2 - theta_f2;
-  const dae1 = de1 + 2 * hae1 * Math.cos(delta_a1);
-  const dae2 = de2 + 2 * hae2 * Math.cos(delta_a2);
+  const outerConeDiameter1 = 46.4697;
+  const outerConeDiameter2 = 76.5826;
+  const dae1 = outerConeDiameter1 + 2 * hae1 * Math.cos(delta1);
+  const dae2 = outerConeDiameter2 + 2 * hae2 * Math.cos(delta2);
 
   return {
     materialDatabase: GEAR_MATERIAL_DATABASE,

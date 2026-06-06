@@ -41,3 +41,19 @@ app-example
 # generated native folders
 /ios
 /android
+
+# IDE / editor
+.idea/
+.vscode/
+*.iml
+
+# AI assistants
+.claude/
+.cursor/
+.aider*
+.windsurf/
+.github/copilot/
+CLAUDE.local.md
+
+# misc / scratch
+check_jsx.py

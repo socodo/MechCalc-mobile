@@ -9,6 +9,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
+    "test:module1": "node --import tsx --test tests/motorModuleExcel.test.ts",
+    "test:gear": "node --import tsx --test tests/gearDriveExcel.test.ts",
+    "test:chain": "node --import tsx --test tests/chainDriveExcel.test.ts",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio"
   },
