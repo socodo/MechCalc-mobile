@@ -27,7 +27,7 @@ import { router, useFocusEffect } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { globalNavigationState } from "@/lib/globalState";
+import { globalNavigationState, type GearSummary, type ChainSummary } from "@/lib/globalState";
 
 function fmt(n: number, digits: number) {
   return Number.isFinite(n) ? n.toFixed(digits) : "—";
@@ -100,6 +100,178 @@ function StepLine({ label, value }: { label: string; value: string }) {
       <Text className="text-right text-[13px] font-inter text-zinc-900 leading-5" style={{ fontWeight: "500", fontFamily: "monospace" }}>
         {value}
       </Text>
+    </View>
+  );
+}
+
+function Badge({ ok, label }: { ok: boolean; label?: string }) {
+  return (
+    <View className={`rounded-full px-2 py-0.5 ${ok ? "bg-green-100" : "bg-red-100"}`}>
+      <Text className={`text-[10px] font-inter ${ok ? "text-green-700" : "text-red-600"}`} style={{ fontWeight: "600" }}>
+        {label ?? (ok ? "ĐẠT" : "KHÔNG ĐẠT")}
+      </Text>
+    </View>
+  );
+}
+
+function OverviewRow({ label, value }: { label: string; value: string }) {
+  return (
+    <View className="flex-row justify-between py-1 border-b border-dashed border-zinc-100 last:border-0">
+      <Text className="text-xs font-inter text-zinc-500">{label}</Text>
+      <Text className="text-xs font-inter text-zinc-900" style={{ fontWeight: "600", fontFamily: "monospace" }}>{value}</Text>
+    </View>
+  );
+}
+
+function ResultsOverview({ snapshot }: { snapshot: MotorCalcSnapshot }) {
+  const gear = globalNavigationState.gearResult as GearSummary | null;
+  const chain = globalNavigationState.chainResult as ChainSummary | null;
+  const [, forceRender] = React.useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      forceRender(n => n + 1);
+    }, [])
+  );
+
+  const allOk =
+    !!gear &&
+    !!chain &&
+    gear.isContactValid && gear.isBending1Valid && gear.isBending2Valid &&
+    chain.isPcValid && chain.isStrengthValid && chain.isImpactValid;
+
+  return (
+    <View className="mt-6 border-t border-zinc-200 pt-5">
+      {/* Tiêu đề */}
+      <View className="flex-row items-center gap-2 mb-4">
+        <Ionicons name="document-text-outline" size={20} color="#0a7ea4" />
+        <Text className="text-[17px] font-inter-black text-zinc-900 tracking-tight">Tổng quan kết quả</Text>
+        {allOk && (
+          <View className="ml-auto rounded-full bg-green-100 px-2.5 py-0.5">
+            <Text className="text-[11px] font-inter text-green-700" style={{ fontWeight: "700" }}>Tất cả đạt ✓</Text>
+          </View>
+        )}
+      </View>
+
+      <View className="gap-3">
+        {/* MODULE 1: ĐỘNG CƠ */}
+        <View className="rounded-2xl border border-zinc-200 bg-white overflow-hidden">
+          <View className="flex-row items-center justify-between bg-blue-50 px-4 py-2.5 border-b border-blue-100">
+            <View className="flex-row items-center gap-2">
+              <Ionicons name="flash-outline" size={16} color="#1d4ed8" />
+              <Text className="text-sm font-inter text-blue-800" style={{ fontWeight: "700" }}>Chọn động cơ</Text>
+            </View>
+            <View className="rounded-full bg-blue-100 px-2 py-0.5">
+              <Text className="text-[11px] font-inter text-blue-700" style={{ fontWeight: "600" }}>{snapshot.motor.model}</Text>
+            </View>
+          </View>
+          <View className="px-4 py-3 gap-0.5">
+            <OverviewRow label="Công suất động cơ (P_đc)" value={`${fmt(snapshot.P_dc, 2)} kW`} />
+            <OverviewRow label="Tốc độ động cơ (n_đc)" value={`${fmtInt(snapshot.n_dc)} v/p`} />
+            <OverviewRow label="Tỷ số truyền chung (u_t)" value={fmt(snapshot.u_t, 3)} />
+            <OverviewRow label="Tỷ số truyền HGT (u_h)" value={fmt(snapshot.u_h, 3)} />
+            <OverviewRow label="Tỷ số truyền cấp nhanh (u_1)" value={fmt(snapshot.u_1, 3)} />
+            <OverviewRow label="Tỷ số truyền cấp chậm (u_2)" value={fmt(snapshot.u_2, 4)} />
+          </View>
+        </View>
+
+        {/* MODULE 2: BÁNH RĂNG CÔN */}
+        <View className="rounded-2xl border border-zinc-200 bg-white overflow-hidden">
+          <View className="flex-row items-center justify-between bg-purple-50 px-4 py-2.5 border-b border-purple-100">
+            <View className="flex-row items-center gap-2">
+              <Ionicons name="settings-outline" size={16} color="#7c3aed" />
+              <Text className="text-sm font-inter text-purple-800" style={{ fontWeight: "700" }}>Bộ truyền bánh răng côn</Text>
+            </View>
+            {gear ? (
+              <Badge ok={gear.isContactValid && gear.isBending1Valid && gear.isBending2Valid} />
+            ) : (
+              <View className="rounded-full bg-zinc-100 px-2 py-0.5">
+                <Text className="text-[10px] font-inter text-zinc-400">Chưa tính</Text>
+              </View>
+            )}
+          </View>
+          {gear ? (
+            <View className="px-4 py-3 gap-0.5">
+              <OverviewRow label="Số răng bánh dẫn (z1)" value={fmtInt(gear.z1)} />
+              <OverviewRow label="Số răng bánh bị dẫn (z2)" value={fmtInt(gear.z2)} />
+              <OverviewRow label="Chiều dài côn ngoài (Re)" value={`${fmt(gear.Re, 2)} mm`} />
+              <OverviewRow label="Chiều rộng răng (b)" value={`${fmt(gear.b, 2)} mm`} />
+              <OverviewRow label="Đường kính trung bình d_m1" value={`${fmt(gear.dm1, 2)} mm`} />
+              <OverviewRow label="Đường kính trung bình d_m2" value={`${fmt(gear.dm2, 2)} mm`} />
+              <View className="flex-row justify-between items-center pt-1">
+                <Text className="text-xs font-inter text-zinc-500">Kiểm tra tiếp xúc / uốn</Text>
+                <View className="flex-row gap-1">
+                  <Badge ok={gear.isContactValid} label="Tiếp xúc" />
+                  <Badge ok={gear.isBending1Valid && gear.isBending2Valid} label="Uốn" />
+                </View>
+              </View>
+            </View>
+          ) : (
+            <View className="px-4 py-4 items-center">
+              <Text className="text-xs font-inter text-zinc-400">Nhấn "Tính bộ truyền bánh răng" để xem kết quả</Text>
+            </View>
+          )}
+        </View>
+
+        {/* MODULE 3: BỘ TRUYỀN XÍCH */}
+        <View className="rounded-2xl border border-zinc-200 bg-white overflow-hidden">
+          <View className="flex-row items-center justify-between bg-emerald-50 px-4 py-2.5 border-b border-emerald-100">
+            <View className="flex-row items-center gap-2">
+              <Ionicons name="link-outline" size={16} color="#059669" />
+              <Text className="text-sm font-inter text-emerald-800" style={{ fontWeight: "700" }}>Bộ truyền xích</Text>
+            </View>
+            {chain ? (
+              <Badge ok={chain.isPcValid && chain.isStrengthValid && chain.isImpactValid} />
+            ) : (
+              <View className="rounded-full bg-zinc-100 px-2 py-0.5">
+                <Text className="text-[10px] font-inter text-zinc-400">Chưa tính</Text>
+              </View>
+            )}
+          </View>
+          {chain ? (
+            <View className="px-4 py-3 gap-0.5">
+              <OverviewRow label="Bước xích (p_c)" value={`${fmt(chain.p_c, 2)} mm`} />
+              <OverviewRow label="Số răng đĩa dẫn (z1)" value={fmtInt(chain.z1)} />
+              <OverviewRow label="Số răng đĩa bị dẫn (z2)" value={fmtInt(chain.z2)} />
+              <OverviewRow label="Đường kính chia d1" value={`${fmt(chain.d1, 2)} mm`} />
+              <OverviewRow label="Đường kính chia d2" value={`${fmt(chain.d2, 2)} mm`} />
+              <OverviewRow label="Khoảng cách trục (a)" value={`${fmt(chain.a, 2)} mm`} />
+              <OverviewRow label="Số mắt xích (X)" value={fmtInt(chain.X)} />
+              <View className="flex-row justify-between items-center pt-1">
+                <Text className="text-xs font-inter text-zinc-500">Kiểm tra bền / va đập</Text>
+                <View className="flex-row gap-1">
+                  <Badge ok={chain.isStrengthValid} label="Bền" />
+                  <Badge ok={chain.isImpactValid} label="Va đập" />
+                </View>
+              </View>
+            </View>
+          ) : (
+            <View className="px-4 py-4 items-center">
+              <Text className="text-xs font-inter text-zinc-400">Nhấn "Tính bộ truyền xích" để xem kết quả</Text>
+            </View>
+          )}
+        </View>
+      </View>
+
+      {/* 2 NÚT */}
+      <View className="mt-5 gap-3">
+        <Button
+          title="In kết quả"
+          variant="outline"
+          icon="print-outline"
+          onPress={() => {
+            console.log("In kết quả...");
+          }}
+        />
+        <Button
+          title="Tạo dự án"
+          variant="primary"
+          icon="folder-open-outline"
+          onPress={() => {
+            router.push("/(tabs)/project");
+          }}
+        />
+      </View>
     </View>
   );
 }
@@ -667,16 +839,8 @@ export default function MotorScreen() {
               />
             </View>
 
-            <View className="mt-2 border-t border-zinc-200 pt-4">
-              <Button
-                title="In kết quả"
-                variant="outline"
-                icon="print-outline"
-                onPress={() => {
-                  console.log("In kết quả...");
-                }}
-              />
-            </View>
+            {/* TỔNG QUAN KẾT QUẢ */}
+            <ResultsOverview snapshot={s} />
           </View>
         ) : null}
       </ScrollView>
