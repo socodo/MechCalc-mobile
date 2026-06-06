@@ -11,6 +11,12 @@ function fmt(n: number, digits: number) {
   return Number.isFinite(n) ? n.toFixed(digits) : "—";
 }
 
+function fmtTrunc(n: number, digits: number) {
+  if (!Number.isFinite(n)) return "—";
+  const factor = 10 ** digits;
+  return (Math.trunc(n * factor) / factor).toFixed(digits);
+}
+
 function fmtSci(n: number) {
   return Number.isFinite(n) ? n.toExponential(2) : "—";
 }
@@ -230,8 +236,7 @@ export default function GearScreen() {
               <StepLine label="Giới hạn mỏi uốn (σFlim0 = 1.8HB2)" value={`${fmt(result.step1.sigmaFlim0, 0)} MPa`} />
               <StepLine label="Số chu kỳ cơ sở tiếp xúc (NHO)" value={fmtSci(result.step1.N_HO)} />
               <StepLine label="Số chu kỳ cơ sở uốn (NFO)" value={fmtSci(result.step1.N_FO)} />
-              <StepLine label="Số chu kỳ làm việc ban đầu (NHE)" value={fmtSci(result.step1.N_HE_raw)} />
-              <StepLine label="Số chu kỳ tiếp xúc sau giới hạn (NHE)" value={fmtSci(result.step1.N_HE)} />
+              <StepLine label="Số chu kỳ làm việc tương đương sau giới hạn (NHE)" value={fmtSci(result.step1.N_HE)} />
               <StepLine label="Số chu kỳ uốn sau giới hạn (NFE)" value={fmtSci(result.step1.N_FE)} />
               <StepLine label="Hệ số tuổi thọ tiếp xúc (KHL)" value={fmt(result.step1.K_HL, 3)} />
               <StepLine label="Hệ số tuổi thọ uốn (KFL)" value={fmt(result.step1.K_FL, 3)} />
@@ -255,7 +260,7 @@ export default function GearScreen() {
               <StepLine label="Số răng bánh dẫn (z1)" value={fmtInt(result.z1)} />
               <StepLine label="Số răng bánh bị dẫn (z2)" value={fmtInt(result.z2)} />
               <StepLine label="Tỉ số truyền thực tế (u_act)" value={fmt(result.u_actual, 3)} />
-              <StepLine label="Sai số tỉ số truyền (Δu)" value={`${fmt(result.u_error * 100, 2)}%`} error={!result.step3.isRatioValid} />
+              <StepLine label="Sai số tỉ số truyền (Δu)" value={fmtTrunc(result.u_error, 4)} error={!result.step3.isRatioValid} />
               <StepLine label="Kết quả sai số" value={result.step3.isRatioValid ? "ĐẠT" : "CẦN KIỂM TRA"} error={!result.step3.isRatioValid} />
               <StepLine label="Hệ số dịch chỉnh tiếp tuyến bánh dẫn (xτ1)" value={fmt(result.step3.x_tau1, 4)} />
               <StepLine label="Hệ số dịch chỉnh tiếp tuyến bánh bị dẫn (xτ2)" value={fmt(result.step3.x_tau2, 4)} />

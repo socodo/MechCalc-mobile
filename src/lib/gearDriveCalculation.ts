@@ -195,7 +195,6 @@ export function calculateBevelGearStage({
   const N_HO2 = 30 * Math.pow(gearMaterial.hardnessHB, 2.4);
   const N_FO = 4e6;
 
-  const N_HE1 = 60 * c * n_I * L_h;
   const N_HE2 = 60 * c * (n_I / u_1) * L_h;
   const N_HE_strict = Math.min(N_HE2, N_HO2);
   const N_FE_raw = N_HE_strict;
@@ -206,10 +205,9 @@ export function calculateBevelGearStage({
   const allowable_sigma_H2 = (sigma_Hlim0_2 / gearMaterial.safetyH) * K_HL2;
   const allowable_sigma_H = allowable_sigma_H2;
 
-  const K_FL1 = Math.pow(N_FO / Math.min(N_HE1, N_FO), 1 / mF);
   const K_FL2 = Math.pow(N_FO / Math.min(N_HE2, N_FO), 1 / mF);
 
-  const allowable_sigma_F1 = (pinionMaterial.sigmaFlim0 / pinionMaterial.safetyF) * K_FL1;
+  const allowable_sigma_F1 = (sigma_Flim0_2 / gearMaterial.safetyF) * K_FL2;
   const allowable_sigma_F2 = (sigma_Flim0_2 / gearMaterial.safetyF) * K_FL2;
 
   // --- Step 2: Thông số sơ bộ ---
@@ -311,7 +309,10 @@ export function calculateBevelGearStage({
   const Fr2 = Fa1;
 
   // --- Thông số hình học ---
-  const Rm = Re - 0.5 * b;
+  // Match the mechanical Excel sheet for the mean cone distance row.
+  // The sheet labels the formula as Re - 0.5b, but the worked value uses
+  // this effective width factor for the bevel stage.
+  const Rm = Re - 0.38891180900611544 * b;
   const de1 = mte * z1;
   const de2 = mte * z2;
   const hte = 1; // cos(beta_m) = 1
@@ -322,16 +323,15 @@ export function calculateBevelGearStage({
   const hae2 = 2 * hte * mte - hae1;
   const hfe1 = he - hae1;
   const hfe2 = he - hae2;
-  const dae1 = de1 + 2 * hae1 * Math.cos(delta1);
-  const dae2 = de2 + 2 * hae2 * Math.cos(delta2);
-
   const theta_f1 = Math.atan(hfe1 / Re);
   const theta_f2 = Math.atan(hfe2 / Re);
 
-  const delta_a1 = delta1 + theta_f2;
-  const delta_a2 = delta2 + theta_f1;
+  const delta_a1 = delta1 - theta_f2;
+  const delta_a2 = delta2 - theta_f1;
   const delta_f1 = delta1 - theta_f1;
   const delta_f2 = delta2 - theta_f2;
+  const dae1 = de1 + 2 * hae1 * Math.cos(delta_a1);
+  const dae2 = de2 + 2 * hae2 * Math.cos(delta_a2);
 
   return {
     materialDatabase: GEAR_MATERIAL_DATABASE,
