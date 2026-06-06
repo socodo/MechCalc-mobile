@@ -1,3 +1,4 @@
+import { useAuth } from "@/context/auth-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
@@ -6,6 +7,7 @@ import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import type { QuickItem } from "@/types/quick-item";
 
 const Index = () => {
+  const { user } = useAuth();
   const quickItems: QuickItem[] = [
     {
       title: "Tính toán",
@@ -27,7 +29,7 @@ const Index = () => {
     <ScrollView className="flex-1  bg-white" contentContainerStyle={{ paddingBottom: 24, paddingTop: 80 }}>
       <View className="mx-auto ">
         <Text className="text-zinc-700 text-3xl font-inter leading-6 tracking-wide">xin chào!</Text>
-        <Text className="text-sky-900  text-3xl font-space-bold  leading-9">Trần Nguyên Anh </Text>
+        <Text className="text-sky-900  text-3xl font-space-bold  leading-9">{user?.fullName ?? "..."}</Text>
       </View>
 
       <View className="px-5 my-10 pt-5">

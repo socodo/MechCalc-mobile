@@ -310,6 +310,20 @@ export default function ChainScreen() {
             variant="outline"
             icon="arrow-back"
             onPress={() => {
+              if (result) {
+                globalNavigationState.chainResult = {
+                  p_c: result.geometry.p_c,
+                  z1: result.geometry.z1,
+                  z2: result.geometry.z2,
+                  d1: result.geometry.d1,
+                  d2: result.geometry.d2,
+                  a: result.geometry.a,
+                  X: result.geometry.X,
+                  isPcValid: result.validations.isPcValid,
+                  isStrengthValid: result.validations.isStrengthValid,
+                  isImpactValid: result.validations.isImpactValid,
+                };
+              }
               globalNavigationState.scrollToPrint = true;
               router.replace("/(tabs)/calc");
             }}
