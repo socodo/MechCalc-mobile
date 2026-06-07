@@ -1,4 +1,3 @@
-import { calculateCylindricalGearStage } from "@/lib/gearDriveCalculation";
 import { chainCalculationService, type ChainCalculationRequest } from "./chain-calculation.service";
 import { gearCalculationService, type GearCalculationRequest } from "./gear-calculation.service";
 import { motorCalculationService, type MotorCalculationRequest } from "./motor-calculation.service";
@@ -112,15 +111,6 @@ export async function saveAllCalculations(
     try {
       const { result: r, inputLh } = fullGearState;
 
-      // Tính cấp chậm (bánh răng trụ) từ dữ liệu trục II
-      const slow = calculateCylindricalGearStage({
-        T_II: motorSnapshot.T_II,
-        n_II: motorSnapshot.n_II,
-        u_2: motorSnapshot.u_2,
-        L_h: inputLh,
-        c: 1,
-      });
-
       const fastWarnings: string[] = [];
       if (!r.step5.isContactValid) fastWarnings.push(`σH=${r.sigma_H.toFixed(1)}>[σH]`);
       if (!r.step6.isBending1Valid) fastWarnings.push("σF1 không đạt");
@@ -155,24 +145,6 @@ export async function saveAllCalculations(
         fastFr1: r.Fr1,
         fastFa1: r.Fa1,
         fastWarning: fastWarnings.length > 0 ? fastWarnings.join("; ") : null,
-        // Cấp chậm (bánh răng trụ)
-        slowZ1: slow.z1,
-        slowZ2: slow.z2,
-        slowM: slow.m,
-        slowAw: slow.aw,
-        slowBw: slow.bw,
-        slowDw1: slow.dw1,
-        slowDw2: slow.dw2,
-        slowDa1: slow.da1,
-        slowDa2: slow.da2,
-        slowDf1: slow.df1,
-        slowDf2: slow.df2,
-        slowSigmaH: slow.sigma_H,
-        slowSigmaF1: slow.sigma_F1,
-        slowSigmaF2: slow.sigma_F2,
-        slowFt1: slow.Ft,
-        slowFr1: slow.Fr,
-        slowWarning: slow.warning,
       };
       await upsertCalculation(
         () => gearCalculationService.get(projectId),

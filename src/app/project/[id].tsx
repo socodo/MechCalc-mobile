@@ -191,49 +191,6 @@ export default function ProjectDetailScreen() {
           <EmptyModule title="Module 1 — Chọn động cơ" icon="flash-outline" color="#1d4ed8" />
         )}
 
-        {/* ── MODULE 3: BÁNH RĂNG ─────────────────────────────────────────────── */}
-        {gear ? (
-          <SectionCard title="Module 3 — Bộ truyền bánh răng" icon="settings-outline" color="#7c3aed">
-            <Text className="text-[11px] font-inter text-zinc-400 mb-1" style={{ textTransform: "uppercase", letterSpacing: 1 }}>Cấp nhanh — Bánh răng côn</Text>
-            <Row label="Số răng bánh dẫn (z1)" value={fmtInt(gear.fastZ1)} />
-            <Row label="Số răng bánh bị dẫn (z2)" value={fmtInt(gear.fastZ2)} />
-            <Row label="Mô-đun ngoài (mte)" value={fmt(gear.fastMte, 3)} />
-            <Row label="Mô-đun trung bình (mtm)" value={fmt(gear.fastMtm, 3)} />
-            <Row label="Chiều dài côn ngoài (Re)" value={`${fmt(gear.fastRe, 2)} mm`} />
-            <Row label="Chiều rộng vành răng (b)" value={`${fmt(gear.fastB, 2)} mm`} />
-            <Row label="d_m1 / d_m2" value={`${fmt(gear.fastDm1, 2)} / ${fmt(gear.fastDm2, 2)} mm`} />
-            <Row label="δ1 / δ2" value={`${fmt(gear.fastDelta1 * 180 / Math.PI, 2)}° / ${fmt(gear.fastDelta2 * 180 / Math.PI, 2)}°`} />
-            <Row label="Lực vòng Ft1" value={`${fmt(gear.fastFt1, 1)} N`} />
-            <Row label="Fr1 / Fa1" value={`${fmt(gear.fastFr1, 1)} / ${fmt(gear.fastFa1, 1)} N`} />
-            <CheckRow label={`σH = ${fmt(gear.fastSigmaH, 1)} ≤ [σH] = ${fmt(gear.allowableSigmaH, 1)} MPa`} ok={gear.fastSigmaH <= gear.allowableSigmaH} />
-            <CheckRow label={`σF1 = ${fmt(gear.fastSigmaF1, 1)} MPa`} ok={gear.fastSigmaF1 <= gear.allowableSigmaF} />
-            <CheckRow label={`σF2 = ${fmt(gear.fastSigmaF2, 1)} MPa`} ok={gear.fastSigmaF2 <= gear.allowableSigmaF} />
-            {gear.fastWarning ? (
-              <Text className="text-xs font-inter text-amber-700 mt-1">{gear.fastWarning}</Text>
-            ) : null}
-
-            <View className="my-2 h-px bg-zinc-100" />
-            <Text className="text-[11px] font-inter text-zinc-400 mb-1" style={{ textTransform: "uppercase", letterSpacing: 1 }}>Cấp chậm — Bánh răng trụ</Text>
-            <Row label="Số răng z1 / z2" value={`${fmtInt(gear.slowZ1)} / ${fmtInt(gear.slowZ2)}`} />
-            <Row label="Mô-đun (m)" value={fmt(gear.slowM, 2)} />
-            <Row label="Khoảng cách trục (aw)" value={`${fmt(gear.slowAw, 2)} mm`} />
-            <Row label="Chiều rộng vành răng (bw)" value={`${fmt(gear.slowBw, 2)} mm`} />
-            <Row label="dw1 / dw2" value={`${fmt(gear.slowDw1, 2)} / ${fmt(gear.slowDw2, 2)} mm`} />
-            <Row label="da1 / da2" value={`${fmt(gear.slowDa1, 2)} / ${fmt(gear.slowDa2, 2)} mm`} />
-            <Row label="df1 / df2" value={`${fmt(gear.slowDf1, 2)} / ${fmt(gear.slowDf2, 2)} mm`} />
-            <Row label="Lực vòng Ft1" value={`${fmt(gear.slowFt1, 1)} N`} />
-            <Row label="Fr1" value={`${fmt(gear.slowFr1, 1)} N`} />
-            <CheckRow label={`σH = ${fmt(gear.slowSigmaH, 1)} MPa`} ok={gear.slowSigmaH <= gear.allowableSigmaH} />
-            <CheckRow label={`σF1 = ${fmt(gear.slowSigmaF1, 1)} MPa`} ok={gear.slowSigmaF1 <= gear.allowableSigmaF} />
-            <CheckRow label={`σF2 = ${fmt(gear.slowSigmaF2, 1)} MPa`} ok={gear.slowSigmaF2 <= gear.allowableSigmaF} />
-            {gear.slowWarning ? (
-              <Text className="text-xs font-inter text-amber-700 mt-1">{gear.slowWarning}</Text>
-            ) : null}
-          </SectionCard>
-        ) : (
-          <EmptyModule title="Module 3 — Bộ truyền bánh răng" icon="settings-outline" color="#7c3aed" />
-        )}
-
         {/* ── MODULE 2: XÍCH ──────────────────────────────────────────────────── */}
         {chain ? (
           <SectionCard title="Module 2 — Bộ truyền xích" icon="link-outline" color="#059669">
@@ -250,6 +207,30 @@ export default function ProjectDetailScreen() {
           </SectionCard>
         ) : (
           <EmptyModule title="Module 2 — Bộ truyền xích" icon="link-outline" color="#059669" />
+        )}
+
+        {/* ── MODULE 3: BÁNH RĂNG ─────────────────────────────────────────────── */}
+        {gear ? (
+          <SectionCard title="Module 3 — Bộ truyền bánh răng" icon="settings-outline" color="#7c3aed">
+            <Row label="Số răng bánh dẫn (z1)" value={fmtInt(gear.fastZ1)} />
+            <Row label="Số răng bánh bị dẫn (z2)" value={fmtInt(gear.fastZ2)} />
+            <Row label="Mô-đun ngoài (mte)" value={fmt(gear.fastMte, 3)} />
+            <Row label="Mô-đun trung bình (mtm)" value={fmt(gear.fastMtm, 3)} />
+            <Row label="Chiều dài côn ngoài (Re)" value={`${fmt(gear.fastRe, 2)} mm`} />
+            <Row label="Chiều rộng vành răng (b)" value={`${fmt(gear.fastB, 2)} mm`} />
+            <Row label="d_m1 / d_m2" value={`${fmt(gear.fastDm1, 2)} / ${fmt(gear.fastDm2, 2)} mm`} />
+            <Row label="δ1 / δ2" value={`${fmt(gear.fastDelta1 * 180 / Math.PI, 2)}° / ${fmt(gear.fastDelta2 * 180 / Math.PI, 2)}°`} />
+            <Row label="Lực vòng Ft1" value={`${fmt(gear.fastFt1, 1)} N`} />
+            <Row label="Fr1 / Fa1" value={`${fmt(gear.fastFr1, 1)} / ${fmt(gear.fastFa1, 1)} N`} />
+            <CheckRow label={`σH = ${fmt(gear.fastSigmaH, 1)} ≤ [σH] = ${fmt(gear.allowableSigmaH, 1)} MPa`} ok={gear.fastSigmaH <= gear.allowableSigmaH} />
+            <CheckRow label={`σF1 = ${fmt(gear.fastSigmaF1, 1)} MPa`} ok={gear.fastSigmaF1 <= gear.allowableSigmaF} />
+            <CheckRow label={`σF2 = ${fmt(gear.fastSigmaF2, 1)} MPa`} ok={gear.fastSigmaF2 <= gear.allowableSigmaF} />
+            {gear.fastWarning ? (
+              <Text className="text-xs font-inter text-amber-700 mt-1">{gear.fastWarning}</Text>
+            ) : null}
+          </SectionCard>
+        ) : (
+          <EmptyModule title="Module 3 — Bộ truyền bánh răng" icon="settings-outline" color="#7c3aed" />
         )}
 
       </ScrollView>

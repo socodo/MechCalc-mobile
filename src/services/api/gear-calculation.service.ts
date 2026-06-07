@@ -30,24 +30,6 @@ export interface GearCalculationRequest {
   fastFr1: number;
   fastFa1: number;
   fastWarning: string | null;
-  // Cấp chậm (bánh răng trụ)
-  slowZ1: number;
-  slowZ2: number;
-  slowM: number;
-  slowAw: number;
-  slowBw: number;
-  slowDw1: number;
-  slowDw2: number;
-  slowDa1: number;
-  slowDa2: number;
-  slowDf1: number;
-  slowDf2: number;
-  slowSigmaH: number;
-  slowSigmaF1: number;
-  slowSigmaF2: number;
-  slowFt1: number;
-  slowFr1: number;
-  slowWarning: string | null;
 }
 
 export interface GearCalculationResponse extends GearCalculationRequest {

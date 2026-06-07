@@ -253,45 +253,7 @@ function ResultsOverview({ snapshot }: { snapshot: MotorCalcSnapshot }) {
           </View>
         </View>
 
-        {/* MODULE 2: BÁNH RĂNG CÔN */}
-        <View className="rounded-2xl border border-zinc-200 bg-white overflow-hidden">
-          <View className="flex-row items-center justify-between bg-purple-50 px-4 py-2.5 border-b border-purple-100">
-            <View className="flex-row items-center gap-2">
-              <Ionicons name="settings-outline" size={16} color="#7c3aed" />
-              <Text className="text-sm font-inter text-purple-800" style={{ fontWeight: "700" }}>Bộ truyền bánh răng côn</Text>
-            </View>
-            {gear ? (
-              <Badge ok={gear.isContactValid && gear.isBending1Valid && gear.isBending2Valid} />
-            ) : (
-              <View className="rounded-full bg-zinc-100 px-2 py-0.5">
-                <Text className="text-[10px] font-inter text-zinc-400">Chưa tính</Text>
-              </View>
-            )}
-          </View>
-          {gear ? (
-            <View className="px-4 py-3 gap-0.5">
-              <OverviewRow label="Số răng bánh dẫn (z1)" value={fmtInt(gear.z1)} />
-              <OverviewRow label="Số răng bánh bị dẫn (z2)" value={fmtInt(gear.z2)} />
-              <OverviewRow label="Chiều dài côn ngoài (Re)" value={`${fmt(gear.Re, 2)} mm`} />
-              <OverviewRow label="Chiều rộng răng (b)" value={`${fmt(gear.b, 2)} mm`} />
-              <OverviewRow label="Đường kính trung bình d_m1" value={`${fmt(gear.dm1, 2)} mm`} />
-              <OverviewRow label="Đường kính trung bình d_m2" value={`${fmt(gear.dm2, 2)} mm`} />
-              <View className="flex-row justify-between items-center pt-1">
-                <Text className="text-xs font-inter text-zinc-500">Kiểm tra tiếp xúc / uốn</Text>
-                <View className="flex-row gap-1">
-                  <Badge ok={gear.isContactValid} label="Tiếp xúc" />
-                  <Badge ok={gear.isBending1Valid && gear.isBending2Valid} label="Uốn" />
-                </View>
-              </View>
-            </View>
-          ) : (
-            <View className="px-4 py-4 items-center">
-              <Text className="text-xs font-inter text-zinc-400">Nhấn "Tính bộ truyền bánh răng" để xem kết quả</Text>
-            </View>
-          )}
-        </View>
-
-        {/* MODULE 3: BỘ TRUYỀN XÍCH */}
+        {/* MODULE 2: BỘ TRUYỀN XÍCH */}
         <View className="rounded-2xl border border-zinc-200 bg-white overflow-hidden">
           <View className="flex-row items-center justify-between bg-emerald-50 px-4 py-2.5 border-b border-emerald-100">
             <View className="flex-row items-center gap-2">
@@ -326,6 +288,44 @@ function ResultsOverview({ snapshot }: { snapshot: MotorCalcSnapshot }) {
           ) : (
             <View className="px-4 py-4 items-center">
               <Text className="text-xs font-inter text-zinc-400">Nhấn "Tính bộ truyền xích" để xem kết quả</Text>
+            </View>
+          )}
+        </View>
+
+        {/* MODULE 3: BÁNH RĂNG CÔN */}
+        <View className="rounded-2xl border border-zinc-200 bg-white overflow-hidden">
+          <View className="flex-row items-center justify-between bg-purple-50 px-4 py-2.5 border-b border-purple-100">
+            <View className="flex-row items-center gap-2">
+              <Ionicons name="settings-outline" size={16} color="#7c3aed" />
+              <Text className="text-sm font-inter text-purple-800" style={{ fontWeight: "700" }}>Bộ truyền bánh răng côn</Text>
+            </View>
+            {gear ? (
+              <Badge ok={gear.isContactValid && gear.isBending1Valid && gear.isBending2Valid} />
+            ) : (
+              <View className="rounded-full bg-zinc-100 px-2 py-0.5">
+                <Text className="text-[10px] font-inter text-zinc-400">Chưa tính</Text>
+              </View>
+            )}
+          </View>
+          {gear ? (
+            <View className="px-4 py-3 gap-0.5">
+              <OverviewRow label="Số răng bánh dẫn (z1)" value={fmtInt(gear.z1)} />
+              <OverviewRow label="Số răng bánh bị dẫn (z2)" value={fmtInt(gear.z2)} />
+              <OverviewRow label="Chiều dài côn ngoài (Re)" value={`${fmt(gear.Re, 2)} mm`} />
+              <OverviewRow label="Chiều rộng răng (b)" value={`${fmt(gear.b, 2)} mm`} />
+              <OverviewRow label="Đường kính trung bình d_m1" value={`${fmt(gear.dm1, 2)} mm`} />
+              <OverviewRow label="Đường kính trung bình d_m2" value={`${fmt(gear.dm2, 2)} mm`} />
+              <View className="flex-row justify-between items-center pt-1">
+                <Text className="text-xs font-inter text-zinc-500">Kiểm tra tiếp xúc / uốn</Text>
+                <View className="flex-row gap-1">
+                  <Badge ok={gear.isContactValid} label="Tiếp xúc" />
+                  <Badge ok={gear.isBending1Valid && gear.isBending2Valid} label="Uốn" />
+                </View>
+              </View>
+            </View>
+          ) : (
+            <View className="px-4 py-4 items-center">
+              <Text className="text-xs font-inter text-zinc-400">Nhấn "Tính bộ truyền bánh răng" để xem kết quả</Text>
             </View>
           )}
         </View>
