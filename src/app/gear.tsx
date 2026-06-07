@@ -355,6 +355,29 @@ export default function GearScreen() {
               variant="success"
               icon="link"
               onPress={() => {
+                if (result) {
+                  globalNavigationState.gearResult = {
+                    z1: result.z1,
+                    z2: result.z2,
+                    u_actual: result.u_actual,
+                    Re: result.Re,
+                    b: result.b,
+                    dm1: result.dm1,
+                    dm2: result.dm2,
+                    sigma_H: result.sigma_H,
+                    allowable_sigma_H: result.allowable_sigma_H,
+                    isContactValid: result.step5.isContactValid,
+                    isBending1Valid: result.step6.isBending1Valid,
+                    isBending2Valid: result.step6.isBending2Valid,
+                  };
+                  globalNavigationState.fullGearState = {
+                    result,
+                    inputTI: parseFloat(torqueNmm.replace(",", ".")),
+                    inputNI: parseFloat(nRpm.replace(",", ".")),
+                    inputU1: parseFloat(uRatio.replace(",", ".")),
+                    inputLh: parseFloat(lhHours.replace(",", ".")),
+                  };
+                }
                 router.push({
                   pathname: "/chain",
                   params: {
@@ -390,6 +413,13 @@ export default function GearScreen() {
                   isContactValid: result.step5.isContactValid,
                   isBending1Valid: result.step6.isBending1Valid,
                   isBending2Valid: result.step6.isBending2Valid,
+                };
+                globalNavigationState.fullGearState = {
+                  result,
+                  inputTI: parseFloat(torqueNmm.replace(",", ".")),
+                  inputNI: parseFloat(nRpm.replace(",", ".")),
+                  inputU1: parseFloat(uRatio.replace(",", ".")),
+                  inputLh: parseFloat(lhHours.replace(",", ".")),
                 };
               }
               globalNavigationState.scrollToPrint = true;

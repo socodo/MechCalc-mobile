@@ -22,10 +22,12 @@ import {
   selectMotorDkStep4Top,
   type MotorDkRow,
 } from "@/services/motor-dk-selection";
+import { projectService, type ProjectResponse } from "@/services/api/project.service";
+import { saveAllCalculations } from "@/services/api/save-project.service";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { globalNavigationState, type GearSummary, type ChainSummary } from "@/lib/globalState";
 
@@ -127,6 +129,82 @@ function ResultsOverview({ snapshot }: { snapshot: MotorCalcSnapshot }) {
   const gear = globalNavigationState.gearResult as GearSummary | null;
   const chain = globalNavigationState.chainResult as ChainSummary | null;
   const [, forceRender] = React.useState(0);
+
+  // ─── Save modal state ──────────────────────────────────────────────────────
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [projects, setProjects] = useState<ProjectResponse[]>([]);
+  const [loadingProjects, setLoadingProjects] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [useNewProject, setUseNewProject] = useState(false);
+  const [newProjectName, setNewProjectName] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
+  const openSaveModal = useCallback(async () => {
+    setShowSaveModal(true);
+    setSaveMsg(null);
+    setSelectedProjectId(null);
+    setUseNewProject(false);
+    setNewProjectName("");
+    setLoadingProjects(true);
+    try {
+      const data = await projectService.getProjects();
+      setProjects(data);
+      if (data.length === 0) setUseNewProject(true);
+    } catch {
+      setProjects([]);
+      setUseNewProject(true);
+    } finally {
+      setLoadingProjects(false);
+    }
+  }, []);
+
+  const handleSave = useCallback(async () => {
+    setSaving(true);
+    setSaveMsg(null);
+    try {
+      let projectId = selectedProjectId;
+
+      if (useNewProject) {
+        if (!newProjectName.trim()) {
+          Alert.alert("Lỗi", "Nhập tên dự án mới.");
+          return;
+        }
+        const created = await projectService.createProject({ name: newProjectName.trim() });
+        projectId = created.id;
+      }
+
+      if (!projectId) {
+        Alert.alert("Lỗi", "Chọn dự án hoặc tạo dự án mới.");
+        return;
+      }
+
+      const result = await saveAllCalculations(
+        projectId,
+        snapshot,
+        globalNavigationState.fullGearState,
+        globalNavigationState.fullChainState,
+      );
+
+      if (result.errors.length > 0) {
+        setSaveMsg({ ok: false, text: result.errors.join("\n") });
+      } else {
+        const modules: string[] = [];
+        if (result.motor) modules.push("Động cơ");
+        if (result.gear) modules.push("Bánh răng");
+        if (result.chain) modules.push("Xích");
+        setSaveMsg({ ok: true, text: `Đã lưu: ${modules.join(", ")}` });
+
+        if (result.motor && result.gear && result.chain) {
+          await projectService.updateProject(projectId, { name: useNewProject ? newProjectName.trim() : projects.find(p => p.id === projectId)?.name ?? "", status: "COMPLETED" }).catch(() => {});
+        }
+      }
+    } catch (e: any) {
+      setSaveMsg({ ok: false, text: e?.message ?? "Lỗi không xác định" });
+    } finally {
+      setSaving(false);
+    }
+  }, [selectedProjectId, useNewProject, newProjectName, snapshot, projects]);
 
   useFocusEffect(
     useCallback(() => {
@@ -256,22 +334,129 @@ function ResultsOverview({ snapshot }: { snapshot: MotorCalcSnapshot }) {
       {/* 2 NÚT */}
       <View className="mt-5 gap-3">
         <Button
-          title="In kết quả"
+          title="Quản lý dự án"
           variant="outline"
-          icon="print-outline"
-          onPress={() => {
-            console.log("In kết quả...");
-          }}
+          icon="folder-open-outline"
+          onPress={() => router.push("/(tabs)/project")}
         />
         <Button
-          title="Tạo dự án"
+          title="Lưu vào dự án"
           variant="primary"
-          icon="folder-open-outline"
-          onPress={() => {
-            router.push("/(tabs)/project");
-          }}
+          icon="cloud-upload-outline"
+          onPress={openSaveModal}
         />
       </View>
+
+      {/* ── SAVE MODAL ──────────────────────────────────────────────────────── */}
+      <Modal visible={showSaveModal} transparent animationType="slide" onRequestClose={() => setShowSaveModal(false)}>
+        <Pressable className="flex-1 justify-end bg-black/40" onPress={() => { if (!saving) setShowSaveModal(false); }}>
+          <Pressable className="rounded-t-3xl bg-white px-5 pt-6 pb-10" onPress={e => e.stopPropagation()}>
+
+            {/* Tiêu đề */}
+            <View className="flex-row items-center justify-between mb-4">
+              <Text className="text-xl font-space-bold text-zinc-900">Lưu vào dự án</Text>
+              <Pressable onPress={() => { if (!saving) setShowSaveModal(false); }} hitSlop={8}>
+                <Ionicons name="close-outline" size={24} color="#71717a" />
+              </Pressable>
+            </View>
+
+            {/* Tóm tắt module */}
+            <View className="mb-4 rounded-xl bg-zinc-50 border border-zinc-100 px-4 py-3 gap-1.5">
+              <Text className="text-xs font-inter text-zinc-500 mb-1" style={{ fontWeight: "600", textTransform: "uppercase", letterSpacing: 1 }}>Dữ liệu sẽ lưu</Text>
+              <ModuleBadge label="Module 1 — Động cơ" ready={true} />
+              <ModuleBadge label="Module 3 — Bánh răng côn" ready={!!globalNavigationState.fullGearState} hint="Chưa tính hoặc chưa nhấn Trở về" />
+              <ModuleBadge label="Module 2 — Xích" ready={!!globalNavigationState.fullChainState} hint="Chưa tính hoặc chưa nhấn Trở về" />
+            </View>
+
+            {/* Danh sách dự án */}
+            {loadingProjects ? (
+              <View className="items-center py-4">
+                <ActivityIndicator color="#0047AB" />
+              </View>
+            ) : (
+              <>
+                {projects.length > 0 && (
+                  <View className="mb-3">
+                    <Text className="text-xs font-inter text-zinc-500 mb-2" style={{ fontWeight: "600" }}>Chọn dự án hiện có</Text>
+                    <ScrollView style={{ maxHeight: 180 }} showsVerticalScrollIndicator={false}>
+                      {projects.map(p => {
+                        const selected = !useNewProject && selectedProjectId === p.id;
+                        return (
+                          <Pressable
+                            key={p.id}
+                            onPress={() => { setSelectedProjectId(p.id); setUseNewProject(false); }}
+                            className={`flex-row items-center gap-3 rounded-xl border px-4 py-3 mb-2 ${selected ? "border-[#0047AB] bg-blue-50" : "border-zinc-200 bg-white"}`}
+                          >
+                            <View className={`h-5 w-5 rounded-full border items-center justify-center ${selected ? "border-[#0047AB] bg-[#0047AB]" : "border-zinc-300"}`}>
+                              {selected && <View className="h-2 w-2 rounded-full bg-white" />}
+                            </View>
+                            <View className="flex-1">
+                              <Text className={`text-sm font-inter ${selected ? "text-[#0047AB]" : "text-zinc-800"}`} style={{ fontWeight: "600" }} numberOfLines={1}>{p.name}</Text>
+                              {p.description ? <Text className="text-xs font-inter text-zinc-400" numberOfLines={1}>{p.description}</Text> : null}
+                            </View>
+                          </Pressable>
+                        );
+                      })}
+                    </ScrollView>
+                  </View>
+                )}
+
+                {/* Tạo dự án mới */}
+                <Pressable
+                  onPress={() => { setUseNewProject(v => !v); setSelectedProjectId(null); }}
+                  className={`flex-row items-center gap-3 rounded-xl border px-4 py-3 mb-3 ${useNewProject ? "border-[#0047AB] bg-blue-50" : "border-zinc-200 bg-white"}`}
+                >
+                  <View className={`h-5 w-5 rounded-full border items-center justify-center ${useNewProject ? "border-[#0047AB] bg-[#0047AB]" : "border-zinc-300"}`}>
+                    {useNewProject ? <View className="h-2 w-2 rounded-full bg-white" /> : <Ionicons name="add" size={12} color="#71717a" />}
+                  </View>
+                  <Text className={`text-sm font-inter ${useNewProject ? "text-[#0047AB]" : "text-zinc-700"}`} style={{ fontWeight: "600" }}>Tạo dự án mới</Text>
+                </Pressable>
+
+                {useNewProject && (
+                  <View className="mb-3">
+                    <View className="h-12 flex-row items-center rounded-xl border border-zinc-300 bg-zinc-50 px-4">
+                      <TextInput
+                        className="flex-1 font-inter text-[15px] text-zinc-900"
+                        placeholder="Tên dự án"
+                        placeholderTextColor="#a1a1aa"
+                        value={newProjectName}
+                        onChangeText={setNewProjectName}
+                      />
+                    </View>
+                  </View>
+                )}
+              </>
+            )}
+
+            {/* Kết quả lưu */}
+            {saveMsg && (
+              <View className={`mb-3 rounded-xl border px-4 py-3 ${saveMsg.ok ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}`}>
+                <Text className={`text-sm font-inter ${saveMsg.ok ? "text-green-800" : "text-red-700"}`} style={{ fontWeight: "500" }}>{saveMsg.text}</Text>
+              </View>
+            )}
+
+            {/* Nút lưu */}
+            <Button
+              title={saving ? "Đang lưu..." : "Lưu"}
+              variant="primary"
+              icon={saving ? undefined : "cloud-upload-outline"}
+              onPress={handleSave}
+              disabled={saving || loadingProjects || (!selectedProjectId && (!useNewProject || !newProjectName.trim()))}
+            />
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </View>
+  );
+}
+
+function ModuleBadge({ label, ready, hint }: { label: string; ready: boolean; hint?: string }) {
+  return (
+    <View className="flex-row items-center gap-2">
+      <Ionicons name={ready ? "checkmark-circle" : "ellipse-outline"} size={16} color={ready ? "#22c55e" : "#a1a1aa"} />
+      <Text className={`text-sm font-inter ${ready ? "text-zinc-800" : "text-zinc-400"}`} style={{ fontWeight: ready ? "500" : "400" }}>
+        {label}{!ready && hint ? ` — ${hint}` : ""}
+      </Text>
     </View>
   );
 }
@@ -314,6 +499,19 @@ export default function MotorScreen() {
       calcError,
     };
   }, [powerKw, nlvRpm, isShow, snapshot, calcError]);
+
+  const handleReset = useCallback(() => {
+    setPowerKw("");
+    setNlvRpm("");
+    setIsShow(false);
+    setSnapshot(null);
+    setCalcError(null);
+    globalNavigationState.motorScreenState = null;
+    globalNavigationState.gearResult = null;
+    globalNavigationState.chainResult = null;
+    globalNavigationState.fullGearState = null;
+    globalNavigationState.fullChainState = null;
+  }, []);
 
   const recalculateDetailed = useCallback((base: any, motorIndex: number) => {
     const motor = base.motorsTop2[motorIndex];
@@ -406,9 +604,19 @@ export default function MotorScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View className="rounded-2xl border border-zinc-200 bg-white px-5 py-5 shadow-sm">
-          <View className="flex-row items-center gap-2 border-b border-zinc-100 pb-3">
-            <Ionicons name="options-outline" size={20} color="#52525b" />
-            <Text className="text-base font-inter-black text-zinc-900">Thông số đầu vào</Text>
+          <View className="flex-row items-center justify-between border-b border-zinc-100 pb-3">
+            <View className="flex-row items-center gap-2">
+              <Ionicons name="options-outline" size={20} color="#52525b" />
+              <Text className="text-base font-inter-black text-zinc-900">Thông số đầu vào</Text>
+            </View>
+            <Pressable
+              onPress={handleReset}
+              hitSlop={8}
+              className="flex-row items-center gap-1.5 rounded-xl border border-zinc-200 px-3 py-1.5"
+            >
+              <Ionicons name="refresh-outline" size={15} color="#71717a" />
+              <Text className="text-[13px] font-inter text-zinc-500">Đặt lại</Text>
+            </Pressable>
           </View>
           <Text className="mt-3 text-[13px] font-inter text-zinc-500 leading-5">
             Nhập nhanh các giá trị cơ bản của hệ thống để tiến hành tính toán.

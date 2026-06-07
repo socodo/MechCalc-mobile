@@ -44,7 +44,10 @@ export interface ChainDriveGeometry {
   d2: number;
   da1: number;
   da2: number;
+  asb: number;
+  xsb: number;
   a: number;
+  deltaA: number;
   X: number;
   L: number;
   v: number;
@@ -71,6 +74,10 @@ export interface ChainDrivePowerParams {
   P_t: number;
   K: number;
   K_x: number;
+  d0: number;
+  b0: number;
+  allowablePower: number;
+  pcMax: number;
 }
 
 export interface ChainDriveResult {
@@ -195,7 +202,7 @@ export function calculateChainDrive(
   const K_n = n_01 / n;
   const P_t = (K * K_z * K_n * P) / K_x;
 
-  const { p_c, d_0 } = getChainStepParameters(P_t, n_01);
+  const { p_c, d_0, b_0, P_max } = getChainStepParameters(P_t, n_01);
   const p_c_max = getMaxPc(n);
   const isPcValid = p_c <= p_c_max;
 
@@ -241,7 +248,10 @@ export function calculateChainDrive(
     d2,
     da1,
     da2,
+    asb: a_sb,
+    xsb: X_sb,
     a,
+    deltaA: delta_a,
     X,
     L,
     v,
@@ -268,6 +278,10 @@ export function calculateChainDrive(
     P_t,
     K,
     K_x,
+    d0: d_0,
+    b0: b_0,
+    allowablePower: P_max,
+    pcMax: p_c_max,
   };
 
   return { powerParams, geometry, validations };

@@ -1,13 +1,14 @@
 import Button from "@/components/common/button";
 import { useAuth } from "@/context/auth-context";
 import { userService } from "@/services/api/user.service";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Profile = () => {
-  const { user, logout, refreshUser } = useAuth();
+  const { user, logout, refreshUser, isAdmin } = useAuth();
 
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -165,7 +166,26 @@ const Profile = () => {
             )}
           </View>
 
-          <View className="mt-10">
+          {isAdmin ? (
+            <Pressable
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              onPress={() => (router as any).push("/(admin)/")}
+              className="mt-6 flex-row items-center justify-between rounded-2xl border border-zinc-200 bg-white px-4 py-3.5"
+            >
+              <View className="flex-row items-center gap-3">
+                <View className="h-8 w-8 items-center justify-center rounded-xl bg-red-50">
+                  <Ionicons name="shield-checkmark-outline" size={18} color="#ef4444" />
+                </View>
+                <View>
+                  <Text className="text-sm font-inter text-zinc-900" style={{ fontWeight: "600" }}>Quản trị viên</Text>
+                  <Text className="text-xs font-inter text-zinc-400">Quản lý người dùng & catalog</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color="#a1a1aa" />
+            </Pressable>
+          ) : null}
+
+          <View className="mt-4">
             <Button title="Đăng xuất" icon="log-out-outline" variant="outline" onPress={handleLogout} />
           </View>
         </ScrollView>

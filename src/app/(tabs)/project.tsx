@@ -1,6 +1,7 @@
 import Button from "@/components/common/button";
 import { projectService, type ProjectResponse } from "@/services/api/project.service";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -119,7 +120,12 @@ export default function ProjectScreen() {
       ) : (
         <ScrollView className="flex-1 px-5" contentContainerStyle={{ paddingBottom: 24, gap: 12 }}>
           {projects.map((p) => (
-            <View key={p.id} className="rounded-2xl border border-zinc-200 bg-white p-4">
+            <Pressable
+              key={p.id}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              onPress={() => (router as any).push({ pathname: "/project/[id]", params: { id: p.id } })}
+              className="rounded-2xl border border-zinc-200 bg-white p-4 active:bg-zinc-50"
+            >
               <View className="flex-row items-start justify-between">
                 <View className="flex-1 mr-3">
                   <Text className="text-base font-space-bold text-zinc-900" numberOfLines={1}>
@@ -131,9 +137,12 @@ export default function ProjectScreen() {
                     </Text>
                   ) : null}
                 </View>
-                <Pressable onPress={() => handleDelete(p.id, p.name)} hitSlop={8}>
-                  <Ionicons name="trash-outline" size={18} color="#ef4444" />
-                </Pressable>
+                <View className="flex-row items-center gap-2">
+                  <Pressable onPress={() => handleDelete(p.id, p.name)} hitSlop={8}>
+                    <Ionicons name="trash-outline" size={18} color="#ef4444" />
+                  </Pressable>
+                  <Ionicons name="chevron-forward-outline" size={16} color="#a1a1aa" />
+                </View>
               </View>
 
               <View className="mt-3 flex-row items-center gap-2">
@@ -152,7 +161,7 @@ export default function ProjectScreen() {
                   {new Date(p.updatedAt).toLocaleDateString("vi-VN")}
                 </Text>
               </View>
-            </View>
+            </Pressable>
           ))}
         </ScrollView>
       )}
@@ -172,25 +181,29 @@ export default function ProjectScreen() {
             <View className="gap-4">
               <View>
                 <Text className="mb-1.5 text-sm font-inter text-zinc-700">Tên dự án *</Text>
-                <TextInput
-                  className="h-12 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 font-inter text-zinc-900"
-                  placeholder="VD: Hộp giảm tốc #1"
-                  placeholderTextColor="#a1a1aa"
-                  value={newName}
-                  onChangeText={setNewName}
-                />
+                <View className="h-12 flex-row items-center rounded-2xl border border-zinc-200 bg-zinc-50 px-4">
+                  <TextInput
+                    className="flex-1 font-inter text-[15px] text-zinc-900"
+                    placeholder="VD: Hộp giảm tốc #1"
+                    placeholderTextColor="#a1a1aa"
+                    value={newName}
+                    onChangeText={setNewName}
+                  />
+                </View>
               </View>
               <View>
                 <Text className="mb-1.5 text-sm font-inter text-zinc-700">Mô tả</Text>
-                <TextInput
-                  className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 font-inter text-zinc-900"
-                  placeholder="Mô tả ngắn (tuỳ chọn)"
-                  placeholderTextColor="#a1a1aa"
-                  value={newDesc}
-                  onChangeText={setNewDesc}
-                  multiline
-                  numberOfLines={3}
-                />
+                <View className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3">
+                  <TextInput
+                    className="font-inter text-[15px] text-zinc-900"
+                    placeholder="Mô tả ngắn (tuỳ chọn)"
+                    placeholderTextColor="#a1a1aa"
+                    value={newDesc}
+                    onChangeText={setNewDesc}
+                    multiline
+                    numberOfLines={3}
+                  />
+                </View>
               </View>
             </View>
 

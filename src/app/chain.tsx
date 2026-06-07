@@ -323,6 +323,12 @@ export default function ChainScreen() {
                   isStrengthValid: result.validations.isStrengthValid,
                   isImpactValid: result.validations.isImpactValid,
                 };
+                globalNavigationState.fullChainState = {
+                  result,
+                  inputP: parseFloat(powerKw.replace(",", ".")),
+                  inputN: parseFloat(nRpm.replace(",", ".")),
+                  inputU: parseFloat(uRatio.replace(",", ".")),
+                };
               }
               globalNavigationState.scrollToPrint = true;
               router.replace("/(tabs)/calc");

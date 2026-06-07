@@ -167,6 +167,170 @@ export interface BevelGearResult {
   };
 }
 
+// ─── Cấp chậm: bánh răng trụ thẳng ───────────────────────────────────────────
+
+export interface CylindricalGearInput {
+  T_II: number; // N.mm
+  n_II: number; // v/p
+  u_2: number;
+  L_h: number;  // giờ
+  c?: number;
+}
+
+export interface CylindricalGearResult {
+  allowable_sigma_H: number;
+  allowable_sigma_F: number;
+  z1: number;
+  z2: number;
+  m: number;
+  aw: number;
+  bw: number;
+  dw1: number;
+  dw2: number;
+  da1: number;
+  da2: number;
+  df1: number;
+  df2: number;
+  sigma_H: number;
+  sigma_F1: number;
+  sigma_F2: number;
+  Ft: number;
+  Fr: number;
+  isContactValid: boolean;
+  isBending1Valid: boolean;
+  isBending2Valid: boolean;
+  warning: string | null;
+}
+
+const YF_TABLE: { z: number; YF: number }[] = [
+  { z: 17, YF: 4.27 }, { z: 18, YF: 4.07 }, { z: 19, YF: 3.92 },
+  { z: 20, YF: 3.80 }, { z: 21, YF: 3.70 }, { z: 22, YF: 3.61 },
+  { z: 24, YF: 3.45 }, { z: 25, YF: 3.38 }, { z: 26, YF: 3.33 },
+  { z: 28, YF: 3.26 }, { z: 30, YF: 3.17 }, { z: 32, YF: 3.09 },
+  { z: 35, YF: 3.03 }, { z: 37, YF: 2.98 }, { z: 40, YF: 2.87 },
+  { z: 42, YF: 2.84 }, { z: 45, YF: 2.79 }, { z: 50, YF: 2.74 },
+  { z: 55, YF: 2.69 }, { z: 60, YF: 2.65 }, { z: 80, YF: 2.56 },
+  { z: 100, YF: 2.52 }, { z: 150, YF: 2.45 }, { z: 200, YF: 2.40 },
+];
+
+function getYF(z: number): number {
+  if (z <= YF_TABLE[0].z) return YF_TABLE[0].YF;
+  const last = YF_TABLE[YF_TABLE.length - 1];
+  if (z >= last.z) return last.YF;
+  for (let i = 0; i < YF_TABLE.length - 1; i++) {
+    if (z >= YF_TABLE[i].z && z <= YF_TABLE[i + 1].z) {
+      const t = (z - YF_TABLE[i].z) / (YF_TABLE[i + 1].z - YF_TABLE[i].z);
+      return YF_TABLE[i].YF + t * (YF_TABLE[i + 1].YF - YF_TABLE[i].YF);
+    }
+  }
+  return 2.5;
+}
+
+const CYLINDRICAL_STD_MODULES = [1, 1.25, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10];
+
+export function calculateCylindricalGearStage({
+  T_II, n_II, u_2, L_h, c = 1,
+}: CylindricalGearInput): CylindricalGearResult {
+  if (T_II <= 0 || n_II <= 0 || u_2 <= 0 || L_h <= 0) {
+    throw new Error("Tất cả các thông số đầu vào phải lớn hơn 0");
+  }
+
+  // Bước 1: vật liệu & ứng suất cho phép (HB2=270 cấp chậm)
+  const HB2 = 270;
+  const mH = 6, mF = 6;
+  const sH = 1.1, sF = 1.75;
+  const sigmaHlim0 = 2 * HB2 + 70;
+  const sigmaFlim0 = 1.8 * HB2;
+  const NHO = 30 * Math.pow(HB2, 2.4);
+  const NFO = 4e6;
+  const NHE = 60 * c * n_II * L_h;
+  const K_HL = Math.pow(NHO / Math.min(NHE, NHO), 1 / mH);
+  const K_FL = Math.pow(NFO / Math.min(NHE, NFO), 1 / mF);
+  const allowable_sigma_H = (sigmaHlim0 / sH) * K_HL;
+  const allowable_sigma_F = (sigmaFlim0 / sF) * K_FL;
+
+  // Bước 2: khoảng cách trục sơ bộ
+  const Ka = 49.5;
+  const psi_ba = 0.35;
+  const K_Hbeta = 1.07;
+  const aw_prelim = Ka * (u_2 + 1) * Math.cbrt(
+    (T_II * K_Hbeta) / (Math.pow(allowable_sigma_H, 2) * u_2 * psi_ba)
+  );
+  const aw_round = Math.ceil(aw_prelim / 5) * 5;
+
+  // Bước 3: mô-đun và số răng
+  const m_min = 0.01 * aw_round;
+  const m = CYLINDRICAL_STD_MODULES.find(v => v >= m_min) ?? CYLINDRICAL_STD_MODULES[CYLINDRICAL_STD_MODULES.length - 1];
+  const z1 = Math.max(17, Math.floor(2 * aw_round / (m * (u_2 + 1))));
+  const z2 = Math.round(u_2 * z1);
+  const aw = m * (z1 + z2) / 2;
+
+  const d1 = m * z1;
+  const d2 = m * z2;
+  const dw1 = 2 * aw / (u_2 + 1);
+  const dw2 = dw1 * u_2;
+  const da1 = d1 + 2 * m;
+  const da2 = d2 + 2 * m;
+  const df1 = d1 - 2.5 * m;
+  const df2 = d2 - 2.5 * m;
+  const bw = psi_ba * aw;
+  const v = Math.PI * dw1 * n_II / 60000;
+
+  // Bước 4: kiểm nghiệm tiếp xúc
+  const alpha = 20 * Math.PI / 180;
+  const db1 = d1 * Math.cos(alpha);
+  const db2 = d2 * Math.cos(alpha);
+  const eps_alpha = (
+    Math.sqrt(da1 * da1 - db1 * db1) +
+    Math.sqrt(da2 * da2 - db2 * db2) -
+    2 * aw * Math.sin(alpha)
+  ) / (2 * Math.PI * m * Math.cos(alpha));
+
+  const Z_M = 274, Z_H = 1.76;
+  const Z_eps = Math.sqrt((4 - eps_alpha) / 3);
+  const delta_H = 0.006, g0 = 61;
+  const v_H = delta_H * g0 * v * Math.sqrt(aw / u_2);
+  const K_Halpha = 1;
+  const K_Hv = 1 + (v_H * bw * dw1) / (2 * T_II * K_Hbeta * K_Halpha);
+  const K_H = K_Hbeta * K_Halpha * K_Hv;
+  const sigma_H = Z_M * Z_H * Z_eps *
+    Math.sqrt((2 * T_II * K_H * (u_2 + 1)) / (bw * u_2 * dw1 * dw1));
+  const isContactValid = sigma_H <= allowable_sigma_H;
+
+  // Bước 5: kiểm nghiệm uốn
+  const Y_eps = 1 / eps_alpha;
+  const Y_F1 = getYF(z1);
+  const Y_F2 = getYF(z2);
+  const K_Falpha = 1, K_Fbeta = 1.16;
+  const delta_F = 0.016;
+  const v_F = delta_F * g0 * v * Math.sqrt(aw / u_2);
+  const K_Fv = 1 + (v_F * bw * dw1) / (2 * T_II * K_Fbeta * K_Falpha);
+  const K_F = K_Fbeta * K_Falpha * K_Fv;
+  const sigma_F1 = (2 * T_II * K_F * Y_eps * Y_F1) / (bw * dw1 * m);
+  const sigma_F2 = sigma_F1 * (Y_F2 / Y_F1);
+  const isBending1Valid = sigma_F1 <= allowable_sigma_F;
+  const isBending2Valid = sigma_F2 <= allowable_sigma_F;
+
+  // Bước 6: lực tác dụng
+  const Ft = (2 * T_II) / dw1; // T_II N.mm, dw1 mm → N
+  const Fr = Ft * Math.tan(alpha);
+
+  const w: string[] = [];
+  if (!isContactValid) w.push(`σH=${sigma_H.toFixed(1)}>[σH]=${allowable_sigma_H.toFixed(1)}`);
+  if (!isBending1Valid) w.push(`σF1=${sigma_F1.toFixed(1)}>[σF]=${allowable_sigma_F.toFixed(1)}`);
+  if (!isBending2Valid) w.push(`σF2=${sigma_F2.toFixed(1)}>[σF]=${allowable_sigma_F.toFixed(1)}`);
+
+  return {
+    allowable_sigma_H, allowable_sigma_F,
+    z1, z2, m, aw, bw, dw1, dw2, da1, da2, df1, df2,
+    sigma_H, sigma_F1, sigma_F2, Ft, Fr,
+    isContactValid, isBending1Valid, isBending2Valid,
+    warning: w.length > 0 ? w.join('; ') : null,
+  };
+}
+
+// ─── Cấp nhanh: bánh răng côn thẳng ──────────────────────────────────────────
+
 function nearestEvenRound(value: number) {
   const lower = Math.floor(value / 2) * 2;
   const upper = Math.ceil(value / 2) * 2;

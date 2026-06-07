@@ -26,6 +26,21 @@ export type ChainSummary = {
   isImpactValid: boolean;
 };
 
+export type FullGearState = {
+  result: any; // BevelGearResult
+  inputTI: number;
+  inputNI: number;
+  inputU1: number;
+  inputLh: number;
+};
+
+export type FullChainState = {
+  result: any; // ChainDriveResult
+  inputP: number;
+  inputN: number;
+  inputU: number;
+};
+
 export const globalNavigationState = {
   scrollToPrint: false,
   motorScreenState: null as {
@@ -37,4 +52,6 @@ export const globalNavigationState = {
   } | null,
   gearResult: null as GearSummary | null,
   chainResult: null as ChainSummary | null,
+  fullGearState: null as FullGearState | null,
+  fullChainState: null as FullChainState | null,
 };
