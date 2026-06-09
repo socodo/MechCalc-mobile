@@ -1,0 +1,206 @@
+\chapter{Thiết kế Hệ thống}
+\label{chap:design}
+
+\section{Kiến trúc Tổng thể}
+\label{sec:design-architecture}
+
+Ứng dụng được tổ chức theo kiến trúc \textbf{3 lớp} (Three-Tier Architecture):
+
+\begin{enumerate}
+  \item \textbf{Lớp Trình bày (Presentation Layer)}: Các màn hình React Native
+        trong \texttt{src/app/} và component UI trong \texttt{src/components/}.
+        Lớp này chỉ có nhiệm vụ hiển thị kết quả và thu thập đầu vào từ người dùng.
+  \item \textbf{Lớp Nghiệp vụ (Business Logic Layer)}: Các hàm tính toán thuần túy
+        (pure functions) trong \texttt{src/lib/} và \texttt{src/services/motor-dk-selection.ts}.
+        Lớp này hoàn toàn độc lập với UI và cơ sở dữ liệu,
+        cho phép kiểm thử đơn vị dễ dàng.
+  \item \textbf{Lớp Dữ liệu (Data Layer)}: Drizzle ORM + Expo SQLite
+        (\texttt{src/db/}) cho dữ liệu cục bộ;
+        Axios client (\texttt{src/services/api/}) cho giao tiếp với backend Java Spring.
+\end{enumerate}
+
+Luồng dữ liệu chính giữa 3 module tính toán:
+màn hình \texttt{calc.tsx} (Module~1) gọi các hàm nghiệp vụ,
+nhận kết quả rồi ghi vào \texttt{globalNavigationState};
+khi điều hướng đến \texttt{chain.tsx} (Module~2) hoặc \texttt{gear.tsx} (Module~3),
+màn hình đọc state và tự động hiển thị kết quả mà không cần người dùng nhập lại.
+
+\section{Áp dụng Design Pattern (Module 5 -- CNPM)}
+\label{sec:design-patterns}
+
+\subsection{Strategy Pattern -- Xử lý Công thức Tính toán}
+
+\textbf{Bài toán}: Bộ truyền bánh răng có hai biến thể khác nhau về công thức
+(bánh răng côn cấp nhanh và bánh răng trụ cấp chậm).
+Nếu viết cứng cả hai vào một hàm duy nhất, code sẽ phức tạp và khó bảo trì.
+Ngoài ra, bộ truyền xích cần cho phép thay thế các hằng số tính toán
+(hệ số môi trường, hệ số sử dụng) mà không sửa logic chính.
+
+\textbf{Giải pháp}: Mỗi biến thể được triển khai thành một hàm tính toán độc lập
+(Concrete Strategy) với kiểu đầu vào và đầu ra được định nghĩa rõ ràng:
+
+\begin{verbatim}
+// Concrete Strategy 1: Bánh răng côn (cấp nhanh)
+calculateBevelGearStage(input: BevelGearInput): BevelGearResult
+
+// Concrete Strategy 2: Bánh răng trụ (cấp chậm)
+calculateCylindricalGearStage(input: CylindricalGearInput): CylindricalGearResult
+
+// Strategy với tham số cấu hình (bộ truyền xích)
+calculateChainDrive(input: ChainDriveInput,
+                   constants: ChainDriveConstants = DEFAULT_CONSTANTS): ChainDriveResult
+\end{verbatim}
+
+Màn hình \texttt{gear.tsx} đóng vai trò Context: nó gọi lần lượt
+\texttt{calculateBevelGearStage} và \texttt{calculateCylindricalGearStage}
+theo cùng một giao diện thống nhất, dễ dàng mở rộng thêm biến thể mới mà không
+ảnh hưởng đến phần còn lại.
+
+\subsection{Observer Pattern -- Đồng bộ Dữ liệu Giữa các Module}
+
+\textbf{Bài toán}: Khi người dùng hoàn thành Module~1,
+Module~2 và Module~3 phải tự động nhận các tham số tương ứng
+($P_{III}$, $n_{III}$, $T_I$, $T_{II}$, \ldots) mà không yêu cầu người dùng nhập lại.
+
+\textbf{Giải pháp}: Đối tượng \texttt{globalNavigationState}
+(định nghĩa trong \texttt{src/lib/globalState.ts}) đóng vai trò Subject (Observable).
+Khi màn hình \texttt{calc.tsx} hoàn thành Module~1, nó cập nhật:
+
+\begin{verbatim}
+// Subject cập nhật trạng thái
+globalNavigationState.gearResult = {
+  bevelResult: calculateBevelGearStage(...),
+  cylindricalResult: calculateCylindricalGearStage(...)
+};
+globalNavigationState.chainResult = calculateChainDrive(...);
+\end{verbatim}
+
+Các màn hình \texttt{gear.tsx} và \texttt{chain.tsx} (đóng vai trò Observer)
+đọc state này trong hook \texttt{useFocusEffect} khi màn hình được kích hoạt,
+tự động nạp và hiển thị kết quả đã tính.
+
+\subsection{Facade Pattern -- Giao diện Thống nhất cho Logic Tính toán}
+
+\textbf{Bài toán}: Mỗi module tính toán gồm nhiều bước phức tạp:
+tra bảng, tính trung gian, kiểm nghiệm nhiều điều kiện.
+Màn hình (UI) không nên biết chi tiết từng bước nội bộ
+-- điều đó làm tăng coupling và khó kiểm thử.
+
+\textbf{Giải pháp}: Mỗi module cung cấp một hàm Facade duy nhất.
+Toàn bộ quy trình nhiều bước được gói gọn bên trong:
+
+\begin{verbatim}
+// Facade Module 2: 1 lời gọi → toàn bộ kết quả xích
+const result = calculateChainDrive({ P, n, u });
+// result.powerParams  — thông số công suất và hệ số
+// result.geometry     — z1, z2, pc, a, X, L, v, Ft, ...
+// result.validations  — 4 kết quả kiểm nghiệm (pass/fail)
+
+// Facade Module 3 cấp nhanh: 1 lời gọi → 7 bước tính
+const bevel = calculateBevelGearStage({ T_I, n_I, u_1, L_h });
+// bevel.step1 .. bevel.step7  — từng bước trung gian
+// bevel.sigma_H, sigma_F1, sigma_F2  — kết quả kiểm nghiệm
+\end{verbatim}
+
+Màn hình chỉ cần gọi một hàm và nhận cấu trúc kết quả đầy đủ để hiển thị,
+không cần biết có bao nhiêu bước trung gian hay bảng tra cứu nào được dùng.
+
+\subsection{Singleton Pattern -- Quản lý Cơ sở Dữ liệu Cục bộ}
+
+\textbf{Bài toán}: Nhiều module (seed, truy vấn động cơ, lưu phiên)
+đều cần truy cập cơ sở dữ liệu SQLite.
+Nếu mỗi module mở một kết nối riêng sẽ gây xung đột file lock và lãng phí bộ nhớ.
+
+\textbf{Giải pháp}: File \texttt{src/db/client.ts} xuất một instance Drizzle duy nhất:
+
+\begin{verbatim}
+// src/db/client.ts
+import { drizzle } from 'drizzle-orm/expo-sqlite';
+import { openDatabaseSync } from 'expo-sqlite';
+
+const sqlite = openDatabaseSync('mechcalc.db');
+export const db = drizzle(sqlite);   // Singleton toàn cục
+\end{verbatim}
+
+Trong JavaScript/TypeScript, module-level exports được khởi tạo đúng một lần
+nhờ cơ chế module caching của Node.js/Metro bundler,
+đảm bảo tính chất Singleton mà không cần class hay static method.
+Mọi file \texttt{import \{ db \} from '@/db/client'} đều nhận cùng một instance.
+
+\section{Thiết kế Cơ sở Dữ liệu}
+\label{sec:design-db}
+
+Cơ sở dữ liệu cục bộ gồm 2 bảng catalog động cơ tiêu chuẩn.
+Dữ liệu phiên tính toán được lưu trên backend PostgreSQL.
+
+\subsection{Bảng \texttt{motors\_dk} -- Catalog Động cơ Series ĐK/IE3}
+
+\begin{table}[H]
+  \centering
+  \caption{Schema bảng \texttt{motors\_dk}}
+  \label{tab:schema-motors-dk}
+  \begin{tabular}{llll}
+    \toprule
+    \textbf{Cột} & \textbf{Kiểu} & \textbf{Ràng buộc} & \textbf{Mô tả} \\
+    \midrule
+    id                    & INTEGER & PK, AUTOINCREMENT & Khóa chính \\
+    model                 & TEXT    & NOT NULL & Mã hiệu (vd: IE3-W41R 160 M2) \\
+    power\_kw             & REAL    & NOT NULL & Công suất định mức (kW) \\
+    speed\_rpm            & INTEGER & NOT NULL & Tốc độ quay định mức (v/p) \\
+    cos\_phi              & REAL    & NOT NULL & Hệ số công suất \\
+    starting\_torque\_ratio & REAL  & NOT NULL & Tỉ số mô-men mở máy $M_a/M_b$ \\
+    max\_torque\_ratio    & REAL    & NOT NULL & Tỉ số mô-men cực đại $M_k/M_b$ \\
+    rotor\_inertia\_gd2   & REAL    & NOT NULL & Mô-men quán tính rotor (kg$\cdot$m$^2$) \\
+    weight\_kg            & REAL    & NOT NULL & Khối lượng (kg) \\
+    poles                 & INTEGER & NOT NULL & Số cực \\
+    sync\_speed\_rpm      & INTEGER & NOT NULL & Tốc độ đồng bộ (v/p) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Bảng \texttt{motors\_4a} có cấu trúc tương tự, lưu catalog động cơ series 4A.
+Cả hai được nạp tự động từ seed data TypeScript khi ứng dụng khởi động lần đầu.
+
+\section{Thiết kế Giao diện Người dùng (UI/UX)}
+\label{sec:design-ui}
+
+\subsection{Nguyên tắc Thiết kế}
+
+Giao diện được thiết kế theo các nguyên tắc sau:
+\begin{itemize}
+  \item \textbf{Mobile-first}: Tối ưu cho màn hình điện thoại dọc (portrait mode).
+  \item \textbf{Minimal input}: Tự động chuyển tham số liên module,
+        giảm tối đa số lần người dùng phải nhập thủ công.
+  \item \textbf{Step-by-step display}: Kết quả tính toán được trình bày
+        theo từng bước có đánh số,
+        giúp sinh viên đối chiếu trực tiếp với tính tay theo giáo trình.
+  \item \textbf{Visual feedback}: Kết quả kiểm nghiệm đạt/không đạt
+        hiển thị bằng màu xanh lá/đỏ kèm giá trị số rõ ràng.
+\end{itemize}
+
+\subsection{Luồng Màn hình (Screen Flow)}
+
+Luồng điều hướng chính của ứng dụng được mô tả như sau:
+
+\begin{enumerate}
+  \item \textbf{Xác thực} (\texttt{(auth)/login.tsx}, \texttt{register.tsx}):
+        Người dùng đăng nhập hoặc đăng ký tài khoản.
+        \texttt{AuthGuard} trong root layout tự động chuyển hướng nếu chưa đăng nhập.
+  \item \textbf{Trang chủ} (\texttt{(tabs)/index.tsx}):
+        Chào mừng, truy cập nhanh vào Tính toán và Dự án.
+  \item \textbf{Module~1 -- Tính động cơ} (\texttt{(tabs)/calc.tsx}):
+        Nhập $P_{lv}$, $n_{lv}$, $L$ $\to$ hiển thị từng bước tính
+        $\to$ chọn động cơ từ danh sách gợi ý
+        $\to$ xem bảng phân phối $P$--$n$--$T$ trên 4 trục.
+  \item \textbf{Module~2 -- Tính xích} (\texttt{chain.tsx}):
+        Tự động nạp tham số từ Module~1
+        $\to$ hiển thị thông số bộ truyền xích và 4 điều kiện kiểm nghiệm.
+  \item \textbf{Module~3 -- Tính bánh răng} (\texttt{gear.tsx}):
+        Tự động nạp tham số từ Module~1
+        $\to$ hiển thị kết quả cấp nhanh (bánh răng côn)
+        và cấp chậm (bánh răng trụ).
+  \item \textbf{Quản lý Dự án} (\texttt{(tabs)/project.tsx}, \texttt{project/[id].tsx}):
+        Danh sách phiên tính toán đã lưu; xem chi tiết từng phiên.
+  \item \textbf{Trang cá nhân} (\texttt{(tabs)/profile.tsx}):
+        Thông tin tài khoản, đăng xuất.
+\end{enumerate}

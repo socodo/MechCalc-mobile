@@ -1,0 +1,216 @@
+\chapter{Kiểm thử}
+\label{chap:testing}
+
+\section{Chiến lược Kiểm thử}
+\label{sec:test-strategy}
+
+Chiến lược kiểm thử của dự án gồm hai cấp độ:
+
+\begin{itemize}
+  \item \textbf{Unit test}: Kiểm thử từng hàm tính toán một cách độc lập,
+        so sánh kết quả với bộ số liệu chuẩn được lấy từ bài đồ án tính tay
+        của sinh viên CKT (Phương án~2)~\cite{LeNhatTruong2026}.
+        Unit test được viết bằng \texttt{node:test} (built-in test runner)
+        và chạy qua lệnh \texttt{npm run test:module1/gear/chain}.
+  \item \textbf{Kiểm thử thủ công}: Chạy ứng dụng trên thiết bị/emulator,
+        nhập thông số Phương án~2 và xác nhận kết quả hiển thị khớp với tính tay.
+\end{itemize}
+
+Ngưỡng chấp nhận: sai số tuyệt đối không quá $5 \times 10^{-4}$
+đối với các giá trị thực (tương đương $\pm 0{,}05\%$),
+đảm bảo yêu cầu NFR2 ($\pm 0{,}5\%$).
+
+\section{Kiểm thử Module 1 -- Tính Chọn Động cơ}
+\label{sec:test-m1}
+
+\textbf{Test file}: \texttt{tests/motorModuleExcel.test.ts}
+
+\textbf{Đầu vào}: $P_{lv} = 7{,}5$~kW; $n_{lv} = 75$~v/p; $L = 10$~năm;
+động cơ chọn: IE3-W41R 160 M2.
+
+\begin{table}[H]
+  \centering
+  \caption{Kết quả kiểm thử Module 1 -- Hiệu suất và chọn động cơ}
+  \label{tab:test-m1-motor}
+  \begin{tabular}{lrrrl}
+    \toprule
+    \textbf{Tham số} & \textbf{Kỳ vọng} & \textbf{Thực tế} & \textbf{Ngưỡng} & \textbf{Kết quả} \\
+    \midrule
+    $\eta_{nt}$ & 0,98 & 0,98 & 0 & \textbf{Đạt} \\
+    $\eta_{brc}$ & 0,96 & 0,96 & 0 & \textbf{Đạt} \\
+    $\eta_{brt}$ & 0,98 & 0,98 & 0 & \textbf{Đạt} \\
+    $\eta_x$ & 0,92 & 0,92 & 0 & \textbf{Đạt} \\
+    $\eta_{ol}$ & 0,992 & 0,992 & 0 & \textbf{Đạt} \\
+    $\eta$ (tổng) & 0,8280 & 0,8280 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $P_{ct}$ (kW) & 9,0576 & 9,0576 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $n_{sb}$ (v/p) & 2100 & 2100 & 0 & \textbf{Đạt} \\
+    $P_{dc}$ (kW) & 11 & 11 & 0 & \textbf{Đạt} \\
+    $n_{dc}$ (v/p) & 2950 & 2950 & 0 & \textbf{Đạt} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \caption{Kết quả kiểm thử Module 1 -- Tỉ số truyền và bảng trục}
+  \label{tab:test-m1-ratio}
+  \begin{tabular}{lrrrl}
+    \toprule
+    \textbf{Tham số} & \textbf{Kỳ vọng} & \textbf{Thực tế} & \textbf{Ngưỡng} & \textbf{Kết quả} \\
+    \midrule
+    $u_t$ & 39,3333 & 39,3333 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $u_h$ & 19,6667 & 19,6667 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $u_1$ & 4,7     & 4,7     & 0 & \textbf{Đạt} \\
+    $u_2$ & 4,1844  & 4,1844  & $5\times10^{-5}$ & \textbf{Đạt} \\
+    $P_I$ (kW) & 8,8765 & 8,8765 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $P_{II}$ (kW) & 8,4533 & 8,4533 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $P_{III}$ (kW) & 8,2179 & 8,2179 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $n_I$ (v/p) & 2950 & 2950 & 0 & \textbf{Đạt} \\
+    $n_{II}$ (v/p) & 628 & 628 & 0,5 & \textbf{Đạt} \\
+    $n_{III}$ (v/p) & 150 & 150 & 0,5 & \textbf{Đạt} \\
+    $T_{dc}$ (N$\cdot$mm) & 35\,610,17 & 35\,610,17 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $T_I$ (N$\cdot$mm) & 28\,735,75 & 28\,735,75 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $T_{II}$ (N$\cdot$mm) & 128\,618,44 & 128\,618,44 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $T_{III}$ (N$\cdot$mm) & 523\,207,40 & 523\,207,40 & 0,5 & \textbf{Đạt} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{Kiểm thử Module 2 -- Tính Bộ truyền Xích}
+\label{sec:test-m2}
+
+\textbf{Test file}: \texttt{tests/chainDriveExcel.test.ts}
+
+\textbf{Đầu vào}: $P = 8{,}2179$~kW; $n = 150$~v/p; $u = 2$.
+
+\begin{table}[H]
+  \centering
+  \caption{Kết quả kiểm thử Module 2 -- Thông số và hình học bộ truyền xích}
+  \label{tab:test-m2}
+  \begin{tabular}{lrrrl}
+    \toprule
+    \textbf{Tham số} & \textbf{Kỳ vọng} & \textbf{Thực tế} & \textbf{Ngưỡng} & \textbf{Kết quả} \\
+    \midrule
+    $z_1$ & 25 & 25 & 0 & \textbf{Đạt} \\
+    $z_2$ & 50 & 50 & 0 & \textbf{Đạt} \\
+    $K_n$ & 1,3333 & 1,3333 & $5\times10^{-5}$ & \textbf{Đạt} \\
+    $P_t$ (kW) & 5,7751 & 5,7751 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $p_c$ (mm) & 25,4 & 25,4 & 0 & \textbf{Đạt} \\
+    $v$ (m/s) & 1,5875 & 1,5875 & $5\times10^{-5}$ & \textbf{Đạt} \\
+    $a_{sb}$ (mm) & 1118 & 1118 & 0,5 & \textbf{Đạt} \\
+    $X$ & 126 & 126 & 0 & \textbf{Đạt} \\
+    $a$ (mm) & 1117,149 & 1117,149 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $d_1$ (mm) & 202,127 & 202,127 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $d_2$ (mm) & 404,254 & 404,254 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $F_t$ (N) & 5176,641 & 5176,641 & 0,02 & \textbf{Đạt} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \caption{Kết quả kiểm thử Module 2 -- Kiểm nghiệm độ bền}
+  \label{tab:test-m2-validation}
+  \begin{tabular}{lrrrl}
+    \toprule
+    \textbf{Điều kiện} & \textbf{Kỳ vọng} & \textbf{Thực tế} & \textbf{Giới hạn} & \textbf{Kết quả} \\
+    \midrule
+    Va đập $i$ (lần/s) & 1,9841 & 1,9841 & $\leq 20$ & \textbf{Đạt} \\
+    An toàn $s$ & 8,8740 & 8,8740 & $\geq 8{,}2$ & \textbf{Đạt} \\
+    Tiếp xúc $\sigma_H$ (MPa) & 580,151 & 580,151 & $\leq 600$ & \textbf{Đạt} \\
+    Áp suất $p_{calc}$ & 10,699 & 10,699 & $\leq 31$ & \textbf{Đạt} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{Kiểm thử Module 3 -- Tính Bộ truyền Bánh răng Côn}
+\label{sec:test-m3}
+
+\textbf{Test file}: \texttt{tests/gearDriveExcel.test.ts}
+
+\textbf{Đầu vào}: $T_I = 28\,735{,}7454$~N$\cdot$mm; $n_I = 2950$~v/p;
+$u_1 = 4{,}7$; $L_h = 4800$~giờ.
+
+\begin{table}[H]
+  \centering
+  \caption{Kết quả kiểm thử Module 3 -- Thông số hình học bánh răng côn}
+  \label{tab:test-m3-geom}
+  \begin{tabular}{lrrrl}
+    \toprule
+    \textbf{Tham số} & \textbf{Kỳ vọng} & \textbf{Thực tế} & \textbf{Ngưỡng} & \textbf{Kết quả} \\
+    \midrule
+    $z_1$ & 26 & 26 & 0 & \textbf{Đạt} \\
+    $z_2$ & 120 & 120 & 0 & \textbf{Đạt} \\
+    $m_{te}$ & 2 & 2 & 0 & \textbf{Đạt} \\
+    $m_{tm}$ & 1,71 & 1,71 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $d_{m1}$ (mm) & 44,46 & 44,46 & $5\times10^{-3}$ & \textbf{Đạt} \\
+    $d_{m2}$ (mm) & 205,2 & 205,2 & $5\times10^{-3}$ & \textbf{Đạt} \\
+    $R_e$ (mm) & 122,784 & 122,784 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $b$ (mm) & 35,608 & 35,608 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $\delta_1$ ($°$) & 12,2251 & 12,2251 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $\delta_2$ ($°$) & 77,7749 & 77,7749 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $x_n$ & 0,388 & 0,388 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $v$ (m/s) & 6,8674 & 6,8674 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $F_t$ (N) & 1292,656 & 1292,656 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $F_n$ (N) & 1375,616 & 1375,616 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $F_{r1}$ (N) & 459,819 & 459,819 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $F_{a1}$ (N) & 99,628 & 99,628 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \caption{Kết quả kiểm thử Module 3 -- Kiểm nghiệm độ bền bánh răng côn}
+  \label{tab:test-m3-strength}
+  \begin{tabular}{lrrrl}
+    \toprule
+    \textbf{Điều kiện} & \textbf{Kỳ vọng} & \textbf{Thực tế} & \textbf{Giới hạn} & \textbf{Kết quả} \\
+    \midrule
+    $[\sigma_H]$ (MPa) & 590,909 & 590,909 & -- & \textbf{Đạt} \\
+    $\sigma_H$ (MPa) & 521,149 & 521,149 & $\leq 590{,}9$ & \textbf{Đạt} \\
+    $[\sigma_F]$ (MPa) & 298,286 & 298,286 & -- & \textbf{Đạt} \\
+    $\sigma_{F1}$ (MPa) & 143,271 & 143,271 & $\leq 298{,}3$ & \textbf{Đạt} \\
+    $\sigma_{F2}$ (MPa) & 171,765 & 171,765 & $\leq 298{,}3$ & \textbf{Đạt} \\
+    $K_H$ & 1,5717 & 1,5717 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    $K_F$ & 2,1625 & 2,1625 & $5\times10^{-4}$ & \textbf{Đạt} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{Kết quả Kiểm thử và Đánh giá}
+\label{sec:test-results}
+
+\begin{table}[H]
+  \centering
+  \caption{Tổng hợp kết quả kiểm thử}
+  \label{tab:test-summary}
+  \begin{tabular}{lcccc}
+    \toprule
+    \textbf{Module} & \textbf{Số test case} & \textbf{Đạt} & \textbf{Không đạt} & \textbf{Tỉ lệ} \\
+    \midrule
+    Module 1 -- Chọn động cơ & 30 & 30 & 0 & 100\% \\
+    Module 2 -- Bộ truyền xích & 22 & 22 & 0 & 100\% \\
+    Module 3 -- Bánh răng côn & 41 & 41 & 0 & 100\% \\
+    \midrule
+    \textbf{Tổng} & \textbf{93} & \textbf{93} & \textbf{0} & \textbf{100\%} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Toàn bộ 93 test case đều đạt.
+Sai số lớn nhất ghi nhận được là $< 5 \times 10^{-4}$
+so với bộ số liệu tính tay chuẩn theo Phương án~2~\cite{LeNhatTruong2026},
+thỏa mãn yêu cầu NFR2 ($\pm 0{,}5\%$).
+
+Một số nhận xét:
+\begin{itemize}
+  \item Module~1 tính đúng hoàn toàn chuỗi $\eta \to P_{ct} \to n_{sb}$,
+        đề xuất đúng động cơ IE3-W41R 160 M2 (11~kW, 2950~v/p)
+        và phân phối chính xác $u_1 = 4{,}7$, $u_2 = 4{,}1844$.
+  \item Module~2 chọn bước xích $p_c = 25{,}4$~mm, số mắt xích $X = 126$,
+        tất cả 4 điều kiện kiểm nghiệm đều đạt với biên an toàn đủ lớn.
+  \item Module~3 (cấp nhanh) tính đúng 7 bước với sai số tiếp xúc
+        $\sigma_H = 521{,}1$~MPa $\leq [\sigma_H] = 590{,}9$~MPa
+        (dư $\approx 11{,}8\%$), đủ biên an toàn theo giáo trình.
+\end{itemize}

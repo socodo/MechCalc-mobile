@@ -1,0 +1,82 @@
+\chapter{Giới thiệu}
+\label{chap:introduction}
+
+\section{Bối cảnh và Động lực}
+\label{sec:intro-motivation}
+
+Trong chương trình đào tạo ngành Cơ Kỹ Thuật tại Trường Đại học Bách Khoa TP.HCM,
+sinh viên được yêu cầu thực hiện các bài toán thiết kế hệ thống dẫn động cơ khí như:
+tính chọn động cơ điện, thiết kế bộ truyền xích và bộ truyền bánh răng.
+Các bài toán này đòi hỏi thực hiện tuần tự nhiều bước tính toán phức tạp,
+tra cứu nhiều bảng số liệu tiêu chuẩn và áp dụng hàng chục công thức từ giáo trình~\cite{trinh2006tinh,Loc2023GiaoTrinh,Loc2020ThietKe}.
+
+Thực tế hiện nay, toàn bộ quá trình tính toán được thực hiện thủ công bằng bút giấy
+hoặc bảng tính Excel rời rạc, dẫn đến một số vấn đề điển hình:
+\begin{itemize}
+  \item Dễ sai số do tra bảng thủ công hoặc nhầm công thức giữa các bước.
+  \item Khi thay đổi một thông số đầu vào (ví dụ: thay động cơ), phải tính lại toàn bộ chuỗi.
+  \item Không có công cụ kiểm tra chéo tức thời giữa các module (động cơ -- xích -- bánh răng).
+\end{itemize}
+
+Xuất phát từ thực tiễn đó, đồ án đa ngành này được thực hiện nhằm xây dựng một
+ứng dụng di động giúp số hóa toàn bộ quy trình tính toán thiết kế,
+kết hợp kiến thức cơ kỹ thuật với phương pháp luận kỹ thuật phần mềm hiện đại.
+
+\section{Mục tiêu Đề tài}
+\label{sec:intro-objectives}
+
+Đề tài hướng đến các mục tiêu cụ thể sau:
+
+\begin{enumerate}
+    \item Xây dựng ứng dụng di động hỗ trợ tính toán 3 module theo đề 2 phương án 2 đồ án thiết kế cơ kỹ thuật (hệ dẫn động thùng trộn):
+        \begin{itemize}
+            \item \textbf{Module 1}: Tính chọn động cơ điện và phân phối tỉ số truyền.
+            \item \textbf{Module 2}: Tính thiết kế và kiểm nghiệm bộ truyền xích ống con lăn.
+            \item \textbf{Module 3}: Tính thiết kế và kiểm nghiệm bộ truyền bánh răng
+                (côn răng thẳng -- cấp nhanh; trụ răng thẳng -- cấp chậm).
+        \end{itemize}
+    \item Áp dụng ít nhất 1 Design Pattern trong thiết kế phần mềm theo yêu cầu hướng Công nghệ Phần mềm của đồ án đa ngành.
+    \item Đảm bảo kết quả tính toán của ứng dụng nhất quán với kết quả tính tay theo phương án 2 đang được triển khai của sinh viên Cơ kỹ thuật \cite{LeNhatTruong2026}.
+\end{enumerate}
+
+\section{Phạm vi Thực hiện}
+\label{sec:intro-scope}
+
+\textbf{Trong phạm vi:}
+\begin{itemize}
+    \item Tính toán cho hệ thống dẫn trục được đề xuất trong Đề số 2 của Đồ án Thiết kế ngành Cơ kỹ thuật học kỳ 252
+    \item Tính toán ba module kể trên, lấy bộ số liệu Phương án~2 làm kiểm thử:
+            công suất $P = 7{,}5$~kW, số vòng quay $n = 75$~v/p, thời gian phục vụ $L = 10$~năm.
+    \item Các biến tùy chỉnh trong các giáo trình \cite{trinh2006tinh, Loc2023GiaoTrinh, Loc2020ThietKe} được cố định theo đồ án thực tế\cite{LeNhatTruong2026}
+    \item Ứng dụng di động đa nền tảng (Android và iOS) xây dựng bằng React Native cùng với Backend được xây dựng bởi Java Spring + PostGreSql.
+    \item Cơ sở dữ liệu cục bộ lưu bảng tra cứu động cơ tiêu chuẩn và bảng vật liệu.
+    \item Lưu/tải lại phiên tính toán trên thiết bị.
+\end{itemize}
+
+\textbf{Ngoài phạm vi:}
+\begin{itemize}
+    \item Hỗ trợ tính toán cho mọi loại thiết kế hệ thống dẫn trục
+    \item Hỗ trợ ngoài ba module được liệt kê ở trên.
+    \item Hỗ trợ người dùng điều chỉnh các biến tùy chỉnh
+\end{itemize}
+
+\section{Cấu trúc Báo cáo}
+\label{sec:intro-structure}
+
+Báo cáo được tổ chức thành 7 chương:
+
+\begin{itemize}
+  \item \textbf{Chương~\ref{chap:introduction} -- Giới thiệu}: Bối cảnh, mục tiêu, phạm vi đề tài.
+  \item \textbf{Chương~\ref{chap:overview} -- Tổng quan}: Kiến thức cơ sở cơ kỹ thuật,
+        công nghệ sử dụng và các công trình liên quan.
+  \item \textbf{Chương~\ref{chap:requirements} -- Phân tích Yêu cầu}: Yêu cầu chức năng,
+        phi chức năng, use case diagram và đặc tả use case.
+  \item \textbf{Chương~\ref{chap:design} -- Thiết kế Hệ thống}: Kiến trúc phần mềm,
+        áp dụng Design Pattern, thiết kế CSDL và giao diện người dùng.
+  \item \textbf{Chương~\ref{chap:implementation} -- Hiện thực}: Chi tiết cài đặt
+        từng module và các pattern đã thiết kế.
+  \item \textbf{Chương~\ref{chap:testing} -- Kiểm thử}: Chiến lược, test case
+        và kết quả kiểm thử.
+  \item \textbf{Chương~\ref{chap:conclusion} -- Kết luận}: Tổng kết kết quả,
+        hạn chế và hướng phát triển.
+\end{itemize}

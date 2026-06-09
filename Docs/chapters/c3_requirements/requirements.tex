@@ -1,0 +1,377 @@
+\chapter{Phân tích Yêu cầu}
+\label{chap:requirements}
+
+\section{Yêu cầu Người dùng (User Requirements)}
+\label{sec:req-user}
+
+Đối tượng người dùng chính là sinh viên ngành Cơ Kỹ Thuật đang thực hiện
+bài tập lớn thiết kế hệ dẫn động. Qua trao đổi với nhóm CKT, các yêu cầu
+tổng quan được xác định như sau:
+
+\begin{itemize}
+    \item Người dùng muốn nhập các thông số đầu bài (công suất, số vòng quay,
+            thời gian phục vụ, phương án) và nhận kết quả tính toán ngay lập tức.
+    \item Người dùng muốn xem gợi ý động cơ phù hợp thay vì phải tra bảng thủ công.
+    %   \item Người dùng muốn \textbf{thay đổi một thông số} và xem toàn bộ kết quả
+            cập nhật tức thì mà không cần tính lại từ đầu.
+    \item Người dùng muốn lưu lại kết quả để tham khảo khi viết báo cáo.
+    \item Ứng dụng phải dùng được không cần kết nối Internet
+            (phòng thi, thư viện không có WiFi).
+\end{itemize}
+
+\section{Yêu cầu Chức năng (Functional Requirements)}
+\label{sec:req-functional}
+
+\subsection{Module 1 -- Tính Chọn Động cơ}
+
+\begin{itemize}
+  \item \textbf{FR1.1}: Người dùng nhập các thông số đầu vào:
+        công suất trục công tác $P_t$~(kW), số vòng quay $n$~(v/p),
+        thời gian phục vụ $L$~(năm), chế độ tải.
+  \item \textbf{FR1.2}: Hệ thống tự động tính hiệu suất $\eta$ từ bảng cố định
+        (bộ truyền côn--trụ--xích), công suất cần thiết $P_{ct}$
+        và số vòng quay sơ bộ $n_{sb}$.
+  \item \textbf{FR1.3}: Hệ thống tra cứu CSDL và hiển thị danh sách động cơ
+        thỏa điều kiện $P_{dc} \geq P_{ct}$ và $n_{db} \approx n_{sb}$;
+        người dùng chọn động cơ phù hợp.
+  \item \textbf{FR1.4}: Hệ thống tính lại tỉ số truyền thực $u_t$, phân phối
+        $u_h$ và $u_x$, xuất bảng công suất -- mô-men -- số vòng quay
+        trên từng trục (I, II, III, công tác).
+\end{itemize}
+
+\subsection{Module 2 -- Tính Bộ truyền Xích}
+
+\begin{itemize}
+  \item \textbf{FR2.1}: Module nhận tự động tham số trục xích
+        ($P$, $n$, $T$) từ kết quả Module~1.
+  \item \textbf{FR2.2}: Hệ thống tính chọn số răng đĩa xích $z_1, z_2$;
+        bước xích $p_c$; khoảng cách trục $a$; số mắc xích $X$.
+  \item \textbf{FR2.3}: Hệ thống kiểm nghiệm: số lần va đập $i \leq [i]$;
+        hệ số an toàn $s \geq [s]$; độ bền tiếp xúc $\sigma_H \leq [\sigma_H]$;
+        áp suất $p \leq [p]$.
+  \item \textbf{FR2.4}: Hiển thị bảng tổng kết thông số bộ truyền xích,
+        kết quả kiểm nghiệm (đạt / không đạt).
+\end{itemize}
+
+\subsection{Module 3 -- Tính Bộ truyền Bánh răng}
+
+\begin{itemize}
+  \item \textbf{FR3.1}: Module nhận tự động tham số từng trục từ kết quả Module~1.
+  \item \textbf{FR3.2}: \textbf{Cấp nhanh -- bánh răng côn}: chọn vật liệu và ứng suất
+        cho phép; xác định thông số hình học (chiều dài côn $R_e$, số răng $z_1, z_2$,
+        mô-đun $m_{te}$, góc côn $\delta_1, \delta_2$); kiểm nghiệm tiếp xúc và uốn.
+  \item \textbf{FR3.4}: Hiển thị bảng tổng kết đầy đủ thông số bánh răng.
+\end{itemize}
+
+\subsection{Quản lý Phiên tính toán}
+
+\begin{itemize}
+  \item \textbf{FR4.1}: Người dùng có thể lưu phiên tính toán hiện tại với tên tự đặt.
+  \item \textbf{FR4.2}: Người dùng có thể tải lại phiên đã lưu và tiếp tục chỉnh sửa.
+  \item \textbf{FR4.3}: Người dùng có thể xóa phiên đã lưu.
+\end{itemize}
+
+\section{Yêu cầu Phi chức năng (Non-Functional Requirements)}
+\label{sec:req-nonfunctional}
+
+\begin{itemize}
+  \item \textbf{NFR1 -- Hiệu năng}: Toàn bộ kết quả tính toán hiển thị trong vòng
+        1~giây sau khi người dùng nhấn \textit{Tính toán}.
+  \item \textbf{NFR2 -- Độ chính xác}: Kết quả các giá trị số (công suất, mô-men,
+        thông số hình học) sai số không quá $\pm 0{,}5\%$ so với tính tay
+        theo giáo trình~\cite{trinh2006tinh}.
+  \item \textbf{NFR3 -- Khả năng sử dụng}: Sinh viên chưa quen lập trình có thể
+        hoàn thành tính toán Module~1 mà không cần đọc hướng dẫn.
+  \item \textbf{NFR4 -- Offline}: Toàn bộ tính năng hoạt động không cần kết nối mạng;
+        bảng tra cứu được đóng gói sẵn trong ứng dụng.
+  \item \textbf{NFR5 -- Nền tảng}: Hỗ trợ Android~10+ và iOS~14+.
+\end{itemize}
+\section{Use Case Diagram}
+\label{sec:req-usecase}
+
+Ứng dụng có một tác nhân chính là \textbf{Sinh viên CKT} (người dùng cuối).
+Các use case chính được xác định như sau:
+
+\begin{itemize}
+  \item \textbf{UC01} -- Tính chọn động cơ điện và phân phối tỉ số truyền.
+  \item \textbf{UC02} -- Tính thiết kế và kiểm nghiệm bộ truyền xích (\texttt{<<include>>} UC01).
+  \item \textbf{UC03} -- Tính thiết kế và kiểm nghiệm bộ truyền bánh răng (\texttt{<<include>>} UC01).
+  \item \textbf{UC04} -- Lưu và tải lại phiên tính toán.
+  \item \textbf{UC05} -- Đăng nhập / Đăng ký tài khoản.
+\end{itemize}
+
+UC02 và UC03 có quan hệ \texttt{<<include>>} với UC01:
+kết quả tính chọn động cơ từ UC01 (công suất, số vòng quay, mô-men trên các trục)
+là đầu vào bắt buộc cho cả hai module tiếp theo.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[scale=0.88,
+  uc/.style={ellipse, draw=black, minimum width=4.8cm, minimum height=1.05cm,
+             align=center, font=\small},
+  inc/.style={dashed, ->, >=stealth}
+]
+  %--- System boundary ---
+  \draw[thick, rounded corners=5pt] (0.5,-0.5) rectangle (12.0,14.0);
+  \node[font=\bfseries\small] at (6.25,13.55) {MechCalc Mobile};
+
+  %--- Use Cases ---
+  \node[uc] (uc05) at (6.25,12.2) {UC05 \\ Đăng nhập / Đăng ký};
+  \node[uc] (uc01) at (6.25, 9.4) {UC01 \\ Tính chọn động cơ};
+  \node[uc] (uc02) at (3.3,  6.0) {UC02 \\ Tính bộ truyền xích};
+  \node[uc] (uc03) at (9.2,  6.0) {UC03 \\ Tính bánh răng};
+  \node[uc] (uc04) at (6.25, 2.6) {UC04 \\ Lưu / Tải phiên};
+
+  %--- Stick-figure actor at (-2.1, 7.2) ---
+  \draw[fill=white] (-2.1,9.0) circle (0.38);   % head
+  \draw (-2.1,8.62) -- (-2.1,7.7);              % body
+  \draw (-2.6,8.15) -- (-1.6,8.15);             % arms
+  \draw (-2.1,7.7)  -- (-2.5,6.85);             % left leg
+  \draw (-2.1,7.7)  -- (-1.7,6.85);             % right leg
+  \node[font=\small, align=center] at (-2.1,6.35) {Sinh viên\\CKT};
+
+  %--- Associations (actor right-arm tip → each UC) ---
+  \draw (-1.6,8.15) -- (uc05.west);
+  \draw (-1.6,8.15) -- (uc01.west);
+  \draw (-1.6,8.15) -- (uc02.west);
+  \draw (-1.6,8.15) -- (uc03.west);
+  \draw (-1.6,8.15) -- (uc04.west);
+
+  %--- <<include>> stereotypes ---
+  \draw[inc] (uc02.north east) -- (uc01.south west)
+        node[midway, above left, font=\scriptsize]
+        {$\langle\!\langle$include$\rangle\!\rangle$};
+  \draw[inc] (uc03.north west) -- (uc01.south east)
+        node[midway, above right, font=\scriptsize]
+        {$\langle\!\langle$include$\rangle\!\rangle$};
+\end{tikzpicture}
+\caption{Use Case Diagram -- Ứng dụng MechCalc Mobile}
+\label{fig:usecase-diagram}
+\end{figure}
+
+\section{Đặc tả Use Case Chi tiết}
+\label{sec:req-usecase-detail}
+
+\subsection{UC01 -- Tính chọn động cơ}
+
+\begin{table}[H]
+\centering
+\caption{Đặc tả UC01 -- Tính chọn động cơ}
+\label{tab:uc01}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+\textbf{Tác nhân} & Sinh viên CKT \\
+\hline
+\textbf{Điều kiện tiên quyết} & Người dùng đã đăng nhập thành công. \\
+\hline
+\textbf{Luồng chính} &
+  1. Người dùng nhập $P_{lv}$~(kW), $n_{lv}$~(v/p), $L$~(năm). \newline
+  2. Hệ thống tính hiệu suất $\eta$, công suất cần thiết $P_{ct}$ và số vòng quay sơ bộ $n_{sb}$. \newline
+  3. Hệ thống truy vấn CSDL, hiển thị danh sách tối đa 5 động cơ gợi ý (sắp xếp theo độ gần $n_{đb} \approx n_{sb}$). \newline
+  4. Người dùng chọn một động cơ phù hợp. \newline
+  5. Hệ thống tính tỉ số truyền thực tế $u_t$, $u_h$, $u_1$, $u_2$ và lập bảng $P$--$n$--$T$ trên 4 trục. \\
+\hline
+\textbf{Luồng thay thế} &
+  3a. Không có động cơ nào thỏa $P_{đc} \geq P_{ct}$ → hiển thị thông báo ``Không tìm thấy động cơ phù hợp''. \\
+\hline
+\textbf{Hậu điều kiện} &
+  Kết quả Module~1 được lưu vào \texttt{globalNavigationState} để Module~2 và 3 sử dụng. \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{UC02 -- Tính bộ truyền xích}
+
+\begin{table}[H]
+\centering
+\caption{Đặc tả UC02 -- Tính bộ truyền xích}
+\label{tab:uc02}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+\textbf{Tác nhân} & Sinh viên CKT \\
+\hline
+\textbf{Điều kiện tiên quyết} & UC01 đã hoàn thành (tồn tại $P_{III}$, $n_{III}$, $u_x$ trong \texttt{globalNavigationState}). \\
+\hline
+\textbf{Luồng chính} &
+  1. Hệ thống tự động nạp $P$, $n$, $u$ từ kết quả Module~1. \newline
+  2. Hệ thống tính số răng $z_1$, $z_2$; bước xích $p_c$; khoảng cách trục $a$; số mắt xích $X$. \newline
+  3. Hệ thống thực hiện 4 kiểm nghiệm: số lần va đập $i$; hệ số an toàn $s$; ứng suất tiếp xúc $\sigma_H$; áp suất $p$. \newline
+  4. Hệ thống hiển thị bảng tổng kết kết quả với trạng thái đạt/không đạt từng điều kiện. \\
+\hline
+\textbf{Hậu điều kiện} &
+  Kết quả bộ truyền xích được lưu vào \texttt{globalNavigationState.chainResult}. \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{UC03 -- Tính bộ truyền bánh răng}
+
+\begin{table}[H]
+\centering
+\caption{Đặc tả UC03 -- Tính bộ truyền bánh răng}
+\label{tab:uc03}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+\textbf{Tác nhân} & Sinh viên CKT \\
+\hline
+\textbf{Điều kiện tiên quyết} & UC01 đã hoàn thành (tồn tại $T_I$, $n_I$, $u_1$, $T_{II}$, $n_{II}$, $u_2$). \\
+\hline
+\textbf{Luồng chính} &
+  1. Hệ thống tự động nạp tham số từng trục từ kết quả Module~1. \newline
+  2. \textbf{Cấp nhanh (bánh răng côn)}: chọn vật liệu, tính kích thước sơ bộ $R_e$, xác định $z_1$, $z_2$, $m_{te}$, $\delta_1$, $\delta_2$; kiểm nghiệm $\sigma_H$ và $\sigma_F$. \newline
+  3. \textbf{Cấp chậm (bánh răng trụ)}: tính khoảng cách trục sơ bộ $a_w$, chọn mô-đun $m$, xác định $z_1$, $z_2$, $b_w$; kiểm nghiệm $\sigma_H$ và $\sigma_F$. \newline
+  4. Hệ thống hiển thị bảng tổng kết đầy đủ thông số hình học và kết quả kiểm nghiệm. \\
+\hline
+\textbf{Hậu điều kiện} &
+  Kết quả bánh răng được lưu vào \texttt{globalNavigationState.gearResult}. \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{UC04 -- Lưu và tải phiên tính toán}
+
+\begin{table}[H]
+\centering
+\caption{Đặc tả UC04 -- Lưu và tải phiên tính toán}
+\label{tab:uc04}
+\begin{tabularx}{\textwidth}{|l|X|}
+\hline
+\textbf{Tác nhân} & Sinh viên CKT \\
+\hline
+\textbf{Điều kiện tiên quyết} & Người dùng đã đăng nhập. \\
+\hline
+\textbf{Luồng chính -- Lưu} &
+  1. Người dùng nhấn nút \textit{Lưu dự án} và nhập tên phiên. \newline
+  2. Hệ thống gọi API backend lưu toàn bộ thông số đầu vào và kết quả tính toán. \newline
+  3. Phiên mới xuất hiện trong danh sách tab \textit{Dự án}. \\
+\hline
+\textbf{Luồng chính -- Tải} &
+  1. Người dùng chọn một phiên từ danh sách Dự án. \newline
+  2. Hệ thống nạp kết quả vào \texttt{globalNavigationState}. \newline
+  3. Người dùng có thể xem lại kết quả của từng module. \\
+\hline
+\textbf{Luồng chính -- Xóa} &
+  1. Người dùng vuốt hoặc nhấn nút Xóa trên một phiên. \newline
+  2. Hệ thống gọi API xóa phiên và cập nhật danh sách. \\
+\hline
+\end{tabularx}
+\end{table}
+
+% ============================================================
+\section{Sơ đồ Tuần tự (Sequence Diagram)}
+\label{sec:req-sequence}
+
+\subsection{SD01 -- UC01: Tính chọn động cơ}
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  part/.style={rectangle, draw=black, minimum width=3.0cm, minimum height=0.8cm,
+               align=center, font=\small},
+  msg/.style={ ->, >=stealth, font=\scriptsize},
+  ret/.style={dashed, ->, >=stealth, font=\scriptsize},
+  life/.style={dashed, gray, thin}
+]
+  %--- Participants ---
+  \node[part] (U)  at ( 0,  0) {Sinh viên};
+  \node[part] (UI) at ( 5,  0) {\texttt{calc.tsx}};
+  \node[part] (SV) at (11,  0) {\small\texttt{motor-dk-selection.ts}};
+  \node[part] (DB) at (16,  0) {SQLite DB};
+
+  %--- Lifelines ---
+  \draw[life] ( 0,-0.4) -- ( 0,-13.5);
+  \draw[life] ( 5,-0.4) -- ( 5,-13.5);
+  \draw[life] (11,-0.4) -- (11,-13.5);
+  \draw[life] (16,-0.4) -- (16,-13.5);
+
+  %--- Messages ---
+  \draw[msg] ( 0,-1.3) -- ( 5,-1.3)
+        node[midway,above] {Nhập $P_{lv}$, $n_{lv}$, $L$};
+
+  \draw[msg] ( 5,-2.6) -- (11,-2.6)
+        node[midway,above] {tính $\eta$, $P_{ct}$, $n_{sb}$};
+  \draw[ret] (11,-3.5) -- ( 5,-3.5)
+        node[midway,above] {$P_{ct} = 9{,}06$ kW,\quad $n_{sb} = 2100$ v/p};
+
+  \draw[msg] ( 5,-4.8) -- (16,-4.8)
+        node[midway,above] {\texttt{SELECT WHERE power\_kw} $\geq P_{ct}$};
+  \draw[ret] (16,-5.8) -- ( 5,-5.8)
+        node[midway,above] {danh sách 5 ứng viên động cơ};
+
+  \draw[msg] ( 5,-7.0) -- ( 0,-7.0)
+        node[midway,above] {Hiển thị danh sách gợi ý};
+
+  \draw[msg] ( 0,-8.3) -- ( 5,-8.3)
+        node[midway,above] {Chọn IE3-W41R 160 M2 (11 kW, 2950 v/p)};
+
+  \draw[msg] ( 5,-9.5) -- (11,-9.5)
+        node[midway,above] {phân phối $u$, tính bảng $P$-$n$-$T$};
+  \draw[ret] (11,-10.4) -- ( 5,-10.4)
+        node[midway,above] {$u_1=4{,}7$;\quad $u_2=4{,}18$;\quad bảng $P$-$n$-$T$ (4 trục)};
+
+  \draw[msg] ( 5,-11.7) -- ( 0,-11.7)
+        node[midway,above] {Hiển thị bảng kết quả};
+
+  % Self-note: write to globalNavigationState
+  \draw[ret] ( 5,-12.8) to[out=0,in=0] ( 5,-13.0)
+        node[right=4pt, font=\scriptsize] {ghi kết quả vào \texttt{globalNavigationState}};
+\end{tikzpicture}
+}
+\caption{Sequence Diagram -- UC01: Tính chọn động cơ}
+\label{fig:sd-uc01}
+\end{figure}
+
+\subsection{SD02 -- UC04: Lưu phiên tính toán}
+
+\begin{figure}[H]
+\centering
+\resizebox{0.92\textwidth}{!}{%
+\begin{tikzpicture}[
+  part/.style={rectangle, draw=black, minimum width=3.0cm, minimum height=0.8cm,
+               align=center, font=\small},
+  msg/.style={ ->, >=stealth, font=\scriptsize},
+  ret/.style={dashed, ->, >=stealth, font=\scriptsize},
+  life/.style={dashed, gray, thin}
+]
+  %--- Participants ---
+  \node[part] (U)  at ( 0, 0) {Sinh viên};
+  \node[part] (UI) at ( 5, 0) {\texttt{project.tsx}};
+  \node[part] (AX) at (10, 0) {Axios Service};
+  \node[part] (BE) at (15, 0) {Spring Backend};
+
+  %--- Lifelines ---
+  \draw[life] ( 0,-0.4) -- ( 0,-9.5);
+  \draw[life] ( 5,-0.4) -- ( 5,-9.5);
+  \draw[life] (10,-0.4) -- (10,-9.5);
+  \draw[life] (15,-0.4) -- (15,-9.5);
+
+  %--- Messages ---
+  \draw[msg] ( 0,-1.3) -- ( 5,-1.3)
+        node[midway,above] {Nhấn Lưu, nhập tên phiên};
+
+  \draw[msg] ( 5,-2.6) -- (10,-2.6)
+        node[midway,above] {\texttt{saveProject(name, data)}};
+
+  \draw[msg] (10,-3.8) -- (15,-3.8)
+        node[midway,above] {POST /api/projects};
+
+  \draw[ret] (15,-4.9) -- (10,-4.9)
+        node[midway,above] {201 Created \{id, name\}};
+
+  \draw[ret] (10,-6.1) -- ( 5,-6.1)
+        node[midway,above] {project saved};
+
+  \draw[msg] ( 5,-7.3) -- ( 0,-7.3)
+        node[midway,above] {Cập nhật danh sách Dự án};
+
+  % Alt: network error
+  \draw[thick] (0,-8.3) -- (15,-8.3);
+  \node[font=\scriptsize, anchor=west] at (0,-8.05) {[alt] Lỗi mạng};
+  \draw[ret] (10,-8.9) -- ( 5,-8.9)
+        node[midway,above] {Network Error → hiển thị thông báo lỗi};
+\end{tikzpicture}
+}
+\caption{Sequence Diagram -- UC04: Lưu phiên tính toán}
+\label{fig:sd-uc04}
+\end{figure}

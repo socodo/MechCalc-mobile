@@ -1,0 +1,269 @@
+\chapter{Hiện thực}
+\label{chap:implementation}
+
+\section{Môi trường và Công cụ Phát triển}
+\label{sec:impl-env}
+
+\begin{table}[H]
+  \centering
+  \caption{Công cụ và thư viện sử dụng trong dự án}
+  \label{tab:impl-tools}
+  \begin{tabular}{lll}
+    \toprule
+    \textbf{Công cụ / Thư viện} & \textbf{Phiên bản} & \textbf{Mục đích} \\
+    \midrule
+    React Native         & 0.81.5  & Framework ứng dụng di động \\
+    Expo SDK             & 54.0.33 & Runtime, toolchain, build \\
+    TypeScript           & 5.9.2   & Ngôn ngữ lập trình \\
+    Expo Router          & 6.0.23  & File-based navigation \\
+    NativeWind           & 4.2.3   & Styling (Tailwind CSS cho RN) \\
+    Drizzle ORM          & 0.44.0  & ORM cho SQLite \\
+    expo-sqlite          & --      & SQLite driver trên thiết bị \\
+    Axios                & 1.17.0  & HTTP client giao tiếp backend \\
+    AsyncStorage         & 2.2.0   & Lưu JWT token cục bộ \\
+    Node.js Test Runner  & built-in & Unit test framework \\
+    VS Code              & --      & IDE phát triển \\
+    Git / GitHub         & --      & Quản lý mã nguồn \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{Cấu trúc Mã nguồn}
+\label{sec:impl-structure}
+
+Dự án được tổ chức theo cấu trúc \textit{feature-based},
+tách biệt rõ ràng giữa UI, nghiệp vụ và dữ liệu:
+
+\begin{verbatim}
+src/
+  app/                    # Màn hình (Expo Router file-based)
+    _layout.tsx           # Root layout: AuthGuard, migration, seed
+    (auth)/               # Luồng xác thực
+      login.tsx, register.tsx
+    (tabs)/               # Tab navigation chính
+      index.tsx           # Trang chủ
+      calc.tsx            # Module 1 - Tính chọn động cơ
+      project.tsx         # Danh sách dự án
+      profile.tsx         # Trang cá nhân
+    chain.tsx             # Module 2 - Tính xích
+    gear.tsx              # Module 3 - Tính bánh răng
+    project/[id].tsx      # Chi tiết dự án
+  lib/
+    chainDriveCalculation.ts   # Nghiệp vụ tính xích (Facade + Strategy)
+    gearDriveCalculation.ts    # Nghiệp vụ tính bánh răng
+    globalState.ts             # Trạng thái liên module (Observer)
+    token-storage.ts           # JWT persistence
+  services/
+    motor-dk-selection.ts      # Nghiệp vụ chọn động cơ (Module 1)
+    api/                       # Axios services cho backend
+  db/
+    client.ts                  # Singleton Drizzle instance
+    schema/motor_dk.ts         # Schema bảng motors_dk
+    seed/                      # Dữ liệu động cơ ĐK và 4A
+  context/
+    auth-context.tsx           # Authentication provider
+\end{verbatim}
+
+\section{Hiện thực Module 1 -- Tính Chọn Động cơ}
+\label{sec:impl-m1}
+
+\subsection{Luồng Xử lý và Công thức Áp dụng}
+
+Module~1 được hiện thực trong \texttt{src/services/motor-dk-selection.ts}
+theo 6 bước của giáo trình~\cite{trinh2006tinh}:
+
+\textbf{Bước 1 -- Tính hiệu suất truyền động tổng}:
+
+Hệ dẫn động gồm: nối trục đàn hồi ($\eta_{nt} = 0{,}98$),
+bánh răng côn ($\eta_{brc} = 0{,}96$), bánh răng trụ ($\eta_{brt} = 0{,}98$),
+bộ truyền xích ($\eta_x = 0{,}92$), 3 cặp ổ lăn ($\eta_{ol} = 0{,}992$ mỗi cặp):
+\[
+  \eta = \eta_{nt} \cdot \eta_{brc} \cdot \eta_{brt} \cdot \eta_x \cdot \eta_{ol}^3
+       = 0{,}98 \times 0{,}96 \times 0{,}98 \times 0{,}92 \times 0{,}992^3
+       \approx 0{,}828
+\]
+
+\textbf{Bước 2 -- Công suất cần thiết}:
+\[
+  P_{ct} = \frac{P_{lv}}{\eta}
+\]
+
+\textbf{Bước 3 -- Số vòng quay sơ bộ}:
+\[
+  n_{sb} = u_{sb} \cdot n_{lv} = 28 \cdot n_{lv}
+\]
+với $u_{sb} = u_{hgt} \cdot u_x = 14 \times 2 = 28$.
+
+\textbf{Bước 4 -- Chọn động cơ}: Hàm \texttt{selectMotorDkStep4Top()} lọc
+$P_{đc} \geq P_{ct}$, nhóm theo (tốc độ đồng bộ, dòng sản phẩm),
+lấy động cơ nhỏ công suất nhất mỗi nhóm, sắp xếp theo $|n_{đb} - n_{sb}|$ tăng dần.
+Trả về tối đa 5 ứng viên để người dùng chọn.
+
+\textbf{Bước 5 -- Tỉ số truyền thực tế}:
+\[
+  u_t = \frac{n_{dc}}{n_{lv}}, \quad
+  u_h = \frac{u_t}{u_x}, \quad
+  u_1 = \text{round}_{1\text{dp}}(0{,}24 \cdot u_h), \quad
+  u_2 = \frac{u_h}{u_1}
+\]
+
+\textbf{Bước 6 -- Bảng $P$--$n$--$T$ trên 4 trục}:
+Công suất được tính ngược từ trục công tác lên trục động cơ qua từng cặp hiệu suất;
+số vòng quay theo chuỗi tỉ số truyền;
+mô-men xoắn $T = 9{,}55 \times 10^6 \cdot P/n$ (N$\cdot$mm).
+
+\subsection{Truy vấn CSDL Động cơ}
+
+Hàm \texttt{selectMotorDkStep4Top} sử dụng Drizzle ORM để truy vấn SQLite:
+
+\begin{verbatim}
+const motors = await db.select().from(Motors_Dk)
+  .where(gte(Motors_Dk.powerKw, P_ct));
+\end{verbatim}
+
+Sau đó áp dụng logic xếp hạng thuần TypeScript (không SQL) để nhóm theo
+(syncSpeedRpm, series) và chọn ứng viên tốt nhất mỗi nhóm.
+
+\section{Hiện thực Module 2 -- Tính Bộ truyền Xích}
+\label{sec:impl-m2}
+
+\subsection{Luồng Xử lý và Công thức Áp dụng}
+
+Module~2 được hiện thực trong \texttt{src/lib/chainDriveCalculation.ts}
+với hàm Facade \texttt{calculateChainDrive(input, constants)}.
+
+Đầu vào: $P$ (kW), $n$ (v/p), $u$ từ kết quả Module~1 ($P_{III}$, $n_{III}$, $u_x$).
+
+\textbf{Số răng đĩa xích}:
+\[
+  z_1 = \max(19,\; 29 - 2u), \quad z_2 = \min(120,\; \text{round}(u \cdot z_1))
+\]
+
+\textbf{Hệ số điều chỉnh công suất và bước xích tính toán}:
+\[
+  K_z = \frac{25}{z_1}, \quad
+  K_n = \frac{n_{01}}{n}, \quad
+  P_t = \frac{K \cdot K_z \cdot K_n \cdot P}{K_x}
+\]
+Tra bảng~5.4 (Bảng \texttt{TABLE\_5\_4} trong code)
+tìm bước xích $p_c$ nhỏ nhất sao cho $P_{max}(n_{01}) \geq P_t$.
+
+\textbf{Hình học bộ truyền}:
+\[
+  d_1 = \frac{p_c z_1}{\pi}, \quad
+  d_2 = \frac{p_c z_2}{\pi}, \quad
+  a_{sb} = 44 p_c
+\]
+\[
+  X_{sb} = \frac{2a_{sb}}{p_c} + \frac{z_1+z_2}{2}
+           + \left(\frac{z_2-z_1}{2\pi}\right)^2 \frac{p_c}{a_{sb}}
+\]
+Số mắt xích $X$ được làm tròn đến số chẵn.
+Khoảng cách trục chính xác:
+\[
+  a = 0{,}25 p_c \left(X - M + \sqrt{(X-M)^2 - 8N}\right) - 0{,}002 \cdot a_{temp}
+\]
+
+\subsection{Hiện thực Kiểm nghiệm Độ bền}
+
+Bốn điều kiện kiểm nghiệm, kết quả lưu trong \texttt{ChainDriveValidations}:
+
+\begin{enumerate}
+  \item \textbf{Va đập}: $i = \frac{z_1 n}{15X} \leq [i] = 20$ lần/s.
+  \item \textbf{An toàn}: $s = \frac{Q_{sb}}{k_d F_t + F_v + F_o} \geq [s] = 8{,}2$.
+  \item \textbf{Tiếp xúc}:
+        $\sigma_H = 0{,}47\sqrt{\dfrac{k_r(k_d F_t + F_{vd}) \cdot E}{A \cdot K_d}}
+         \leq [\sigma_H] = 600$ MPa.
+  \item \textbf{Áp suất}: $p_{calc} \leq [p_0]$.
+\end{enumerate}
+
+\section{Hiện thực Module 3 -- Tính Bộ truyền Bánh răng}
+\label{sec:impl-m3}
+
+\subsection{Bánh răng Côn -- Cấp Nhanh}
+
+Hiện thực trong hàm \texttt{calculateBevelGearStage()} với 7 bước:
+
+\textbf{Bước 1 -- Vật liệu và ứng suất cho phép}:
+Cả hai bánh dùng thép 40XH tôi cải thiện ($HB_1 = 300$, $HB_2 = 290$).
+Số chu kỳ làm việc cơ sở:
+$N_{HO} = 30 \cdot HB_2^{2{,}4}$; $N_{FO} = 4 \times 10^6$.
+Ứng suất tiếp xúc cho phép:
+\[
+  [\sigma_H] = \frac{\sigma_{Hlim0}}{s_H} \cdot K_{HL}
+             = \frac{2 \cdot 290 + 70}{1{,}1} \approx 590{,}9 \text{ MPa}
+\]
+
+\textbf{Bước 2 -- Kích thước sơ bộ}:
+\[
+  R_e = K_r \sqrt{u_1^2+1} \cdot
+        \sqrt[3]{\frac{T_I K_{H\beta}}{(1-K_{be}) K_{be} u_1 [\sigma_H]^2}}
+\]
+với $K_{be} = 0{,}29$, $K_{H\beta} = 1{,}18$, $K_r = 50$, $K_d = 100$.
+
+\textbf{Bước 3 -- Số răng và mô-đun}:
+$z_{1p} = 16$; $z_1 = \text{round}_{even}(1{,}6 \cdot z_{1p}) = 26$;
+$z_2 = \min(120, u_1 \cdot z_1)$.
+Mô-đun vòng ngoài $m_{te}$ được chọn từ dãy tiêu chuẩn.
+
+\textbf{Bước 4 -- Góc côn}: $\delta_1 = \arctan(z_1/z_2)$; $\delta_2 = 90° - \delta_1$.
+
+\textbf{Bước 5--6 -- Kiểm nghiệm tiếp xúc và uốn}:
+Tính $K_{Hv}$, $K_{Fv}$ (hệ số tải trọng động),
+\[
+  \sigma_H = Z_M Z_H Z_\varepsilon
+             \sqrt{\frac{2 T_I K_H \sqrt{u_1^2+1}}{0{,}85 \cdot b \cdot d_{m1}^2 \cdot u_1}}
+\]
+\[
+  \sigma_{F1} = \frac{2 T_I K_F Y_\varepsilon Y_\beta Y_{F1}}{0{,}85 \cdot b \cdot m_{nm} \cdot d_{m1}}
+\]
+
+\textbf{Bước 7 -- Lực tác dụng}:
+$F_t = 2T_I/d_{m1}$; $F_n = F_t/\cos\alpha$;
+$F_{r1} = F_t \tan\alpha \cos\delta_1$; $F_{a1} = F_t \tan\alpha \sin\delta_1$.
+
+\subsection{Bánh răng Trụ -- Cấp Chậm}
+
+Hiện thực trong hàm \texttt{calculateCylindricalGearStage()} với 5 bước chính.
+Vật liệu: thép HB$_2 = 270$; $[\sigma_H] = (2\cdot270+70)/1{,}1 \cdot K_{HL}$.
+
+\textbf{Khoảng cách trục sơ bộ}:
+\[
+  a_w = K_a (u_2+1) \sqrt[3]{\frac{T_{II} K_{H\beta}}{[\sigma_H]^2 u_2 \psi_{ba}}}
+\]
+với $K_a = 49{,}5$, $\psi_{ba} = 0{,}35$, $K_{H\beta} = 1{,}07$.
+Làm tròn $a_w$ lên bội số của 5.
+
+\textbf{Mô-đun}: $m \geq 0{,}01 a_w$, chọn giá trị tiêu chuẩn nhỏ nhất thỏa điều kiện
+từ dãy $\{1,\; 1{,}25,\; 1{,}5,\; 2,\; 2{,}5,\; 3,\; 4,\; 5,\; 6,\; 8,\; 10\}$.
+
+\section{Quản lý Trạng thái Liên Module}
+\label{sec:impl-state}
+
+File \texttt{src/lib/globalState.ts} định nghĩa kiểu \texttt{globalNavigationState}:
+
+\begin{verbatim}
+export const globalNavigationState: {
+  gearResult: { bevelResult, cylindricalResult } | null;
+  chainResult: ChainDriveResult | null;
+  motorScreenState: { selectedMotor, u1, u2, ... } | null;
+} = { gearResult: null, chainResult: null, motorScreenState: null };
+\end{verbatim}
+
+Đây là hiện thực của Observer Pattern:
+khi Module~1 cập nhật state, Module~2 và 3 đọc và hiển thị kết quả
+mà không cần truyền props qua stack navigation.
+
+\section{Hiện thực Khởi động và Seed Dữ liệu}
+\label{sec:impl-startup}
+
+Root layout (\texttt{src/app/\_layout.tsx}) thực hiện chuỗi khởi tạo khi app mở:
+
+\begin{enumerate}
+  \item \texttt{migrate(db)} -- chạy SQL migration tạo bảng \texttt{motors\_dk} và \texttt{motors\_4a}.
+  \item \texttt{seedMotorsDk(db)} -- kiểm tra nếu bảng trống thì nạp toàn bộ dữ liệu catalog.
+  \item \texttt{seedMotors4a(db)} -- tương tự cho series 4A.
+\end{enumerate}
+
+Sau khi khởi tạo xong, splash screen được ẩn và \texttt{AuthGuard} kiểm tra token:
+nếu chưa đăng nhập thì chuyển hướng đến \texttt{/(auth)/login}.

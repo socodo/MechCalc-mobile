@@ -1,0 +1,117 @@
+\chapter{Tổng quan}
+\label{chap:overview}
+
+\section{Kiến thức Cơ sở về Hệ thống Dẫn động Cơ khí}
+\label{sec:overview-mech}
+
+\subsection{Hệ thống Dẫn động Thùng Trộn}
+
+Đề bài cơ kỹ thuật (Phương án~2) yêu cầu thiết kế hệ thống dẫn động thùng trộn
+với sơ đồ động học như sau:
+
+\[
+  \text{Động cơ điện} \xrightarrow{\text{nối trục đàn hồi}}
+  \text{HGT côn--trụ 2 cấp} \xrightarrow{\text{xích ống con lăn}}
+  \text{Thùng trộn}
+\]
+
+Các thông số thiết kế được cho sẵn theo Phương án~2:
+
+\begin{table}[H]
+  \centering
+  \caption{Thông số thiết kế đầu vào}
+  \label{tab:input-params}
+  \begin{tabular}{llcc}
+    \toprule
+    \textbf{Ký hiệu} & \textbf{Thông số}                    & \textbf{Giá trị} & \textbf{Đơn vị} \\
+    \midrule
+    $P$              & Công suất trên thùng trộn            & 7,5              & kW              \\
+    $n$              & Số vòng quay trên trục thùng trộn    & 75               & v/p             \\
+    $L$              & Thời gian phục vụ                    & 10               & năm             \\
+    --               & Chế độ vận hành                      & \multicolumn{2}{l}{Quay 1 chiều, tải va đập nhẹ} \\
+    --               & Lịch làm việc                        & \multicolumn{2}{l}{300 ngày/năm, 2 ca/ngày, 8 h/ca} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Hệ thống bao gồm các bộ phận truyền động sau, mỗi bộ phận sẽ được hỗ trợ bởi một module tính toán trong ứng dụng:
+
+
+\begin{itemize}
+    \item \textbf{Động cơ điện ba pha không đồng bộ}: nguồn động lực cho toàn hệ.
+    \item \textbf{Nối trục đàn hồi}: kết nối trục động cơ với trục vào hộp giảm tốc.
+    \item \textbf{Hộp giảm tốc côn--trụ hai cấp}: cấp nhanh dùng bánh răng côn,
+            cấp chậm dùng bánh răng trụ răng thẳng.
+    \item \textbf{Bộ truyền xích ống con lăn}: nối trục ra hộp giảm tốc với thùng trộn.
+\end{itemize}
+
+
+\subsection{Các Module Tính toán Cần Hỗ trợ}
+
+Quy trình tính chọn động cơ gồm các bước \cite{LeNhatTruong2026}
+
+\subsubsection*{Module 1 -- Tính Chọn Động cơ và Phân phối Tỉ số Truyền}
+\begin{itemize}
+    \item Tính chọn động cơ điện
+    \item Phân phối tỷ số truyền
+\end{itemize}
+
+\subsubsection*{Module 2 -- Tính bộ truyền xích}
+\begin{itemize}
+    \item Tính thông số thiết kế bộ truyền xích
+    \item Kiểm nghiệm bộ truyền
+\end{itemize}
+
+\subsubsection*{Module 3 -- Tính bộ truyền bánh răng}
+\begin{itemize}
+    \item Tính bộ truyền kín cấp nhanh
+    \item Tính bộ truyền kín cấp chậm
+\end{itemize}
+
+
+\section{Các Công nghệ Sử dụng}
+\label{sec:overview-tech}
+
+\subsection{Nền tảng Phát triển Ứng dụng Di động}
+
+Ứng dụng được xây dựng trên nền tảng \textbf{React Native} phiên bản 0.81 kết hợp với \textbf{Expo SDK 54}.
+React Native cho phép viết một codebase duy nhất bằng TypeScript và biên dịch ra ứng dụng gốc (native)
+cho cả Android và iOS, đáp ứng yêu cầu đa nền tảng của đề tài.
+
+\textbf{Expo Router v6} được sử dụng để quản lý điều hướng theo cơ chế \textit{file-based routing}:
+mỗi tệp trong thư mục \texttt{src/app/} tương ứng với một màn hình,
+tương tự cách Next.js hoạt động trên web.
+Cơ chế này giúp giảm boilerplate và dễ dàng mở rộng thêm màn hình mới.
+
+\textbf{NativeWind v4} (Tailwind CSS cho React Native) được dùng để định kiểu giao diện
+thông qua các utility class, đạt giao diện nhất quán mà không cần viết \texttt{StyleSheet} thủ công.
+
+\subsection{Cơ sở Dữ liệu Cục bộ}
+
+Dữ liệu cục bộ được lưu trữ trong \textbf{SQLite} thông qua thư viện \texttt{expo-sqlite}.
+ORM \textbf{Drizzle v0.44} được dùng để định nghĩa schema và thực hiện truy vấn kiểu an toàn
+(type-safe), tránh lỗi SQL thủ công.
+
+Dữ liệu bảng tra cứu động cơ (catalog ĐK và 4A) được đóng gói sẵn vào ứng dụng
+dưới dạng seed data TypeScript.
+Khi ứng dụng khởi động lần đầu, hệ thống tự động chạy migration tạo bảng
+và nạp dữ liệu động cơ vào SQLite, đảm bảo tính năng tra cứu hoạt động hoàn toàn offline.
+
+\subsection{Quản lý Trạng thái và Giao tiếp Liên Module}
+
+Trạng thái liên module được quản lý bằng đối tượng \textbf{globalNavigationState} --
+một plain object toàn cục được chia sẻ giữa các màn hình tính toán.
+Khi Module~1 hoàn thành, kết quả được ghi vào \texttt{globalNavigationState.gearResult}
+và \texttt{chainResult}; Module~2 và 3 đọc lại các giá trị này khi màn hình được điều hướng đến.
+
+Dữ liệu phiên tính toán và tài khoản người dùng được đồng bộ với backend
+qua thư viện \textbf{Axios}.
+JWT access token và refresh token được lưu cục bộ bằng \textbf{AsyncStorage},
+cho phép tự động khôi phục phiên đăng nhập.
+
+\subsection{Backend}
+
+Backend được xây dựng bằng \textbf{Java Spring Boot} với cơ sở dữ liệu \textbf{PostgreSQL},
+chịu trách nhiệm xác thực người dùng và lưu trữ phiên tính toán trên server.
+Phần backend nằm ngoài phạm vi của báo cáo này; client mobile giao tiếp với backend
+thông qua REST API được cấu hình qua biến môi trường \texttt{EXPO\_PUBLIC\_API\_URL}.

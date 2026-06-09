@@ -1,0 +1,78 @@
+\chapter{Kết luận và Hướng Phát triển}
+\label{chap:conclusion}
+
+\section{Kết quả Đạt được}
+\label{sec:conclusion-results}
+
+Đề tài đã hoàn thành các mục tiêu đề ra ban đầu:
+
+\begin{enumerate}
+  \item \textbf{3 module tính toán hoàn chỉnh}:
+    \begin{itemize}
+      \item \textbf{Module~1}: Tính chọn động cơ điện, phân phối tỉ số truyền
+            và lập bảng $P$--$n$--$T$ trên 4 trục.
+            Ứng dụng tự động truy vấn catalog động cơ (ĐK, IE3, 4A) từ SQLite cục bộ,
+            đề xuất danh sách tối đa 5 ứng viên phù hợp.
+      \item \textbf{Module~2}: Tính thiết kế và kiểm nghiệm bộ truyền xích ống con lăn
+            với 4 điều kiện bền (va đập, an toàn, tiếp xúc, áp suất).
+      \item \textbf{Module~3}: Tính thiết kế và kiểm nghiệm bánh răng côn thẳng
+            (cấp nhanh) và bánh răng trụ thẳng (cấp chậm).
+    \end{itemize}
+
+  \item \textbf{4 Design Pattern được áp dụng đúng mục đích}:
+    Strategy Pattern (đa biến thể công thức),
+    Observer Pattern (đồng bộ dữ liệu liên module qua \texttt{globalNavigationState}),
+    Facade Pattern (giao diện một hàm duy nhất cho logic phức tạp),
+    Singleton Pattern (một kết nối SQLite duy nhất suốt vòng đời ứng dụng).
+
+  \item \textbf{Độ chính xác cao}:
+        Toàn bộ 93 test case tự động so với bộ số liệu chuẩn Phương án~2
+        đều đạt ngưỡng sai số $< 5 \times 10^{-4}$,
+        vượt xa yêu cầu $\pm 0{,}5\%$ đề ra trong NFR2.
+
+  \item \textbf{Đa nền tảng và offline}: Ứng dụng chạy trên Android~10+
+        và iOS~14+; toàn bộ tính toán và tra cứu hoạt động không cần Internet.
+
+  \item \textbf{Luồng dữ liệu tự động}: Tham số từ Module~1 tự động được
+        chuyển sang Module~2 và 3, loại bỏ việc phải nhập lại thủ công.
+\end{enumerate}
+
+\section{Hạn chế}
+\label{sec:conclusion-limitations}
+
+\begin{itemize}
+  \item \textbf{Giới hạn phương án}: Ứng dụng được tối ưu và kiểm thử cho
+        Phương án~2 của Đề số~2 (hệ dẫn động thùng trộn).
+        Các đề bài khác chưa được kiểm chứng đầy đủ.
+  \item \textbf{Bảng tra cứu giới hạn}: Catalog động cơ chỉ gồm series ĐK và 4A.
+        Các dòng động cơ khác (ABB, Siemens, \ldots) chưa được tích hợp.
+  \item \textbf{Module~3 cấp chậm}: Bánh răng trụ cấp chậm
+        (\texttt{calculateCylindricalGearStage}) chưa có test case
+        riêng so với đồ án tính tay; chỉ được xác nhận qua kiểm thử thủ công.
+  \item \textbf{Giao diện}: Chưa được kiểm tra kỹ trên các kích thước màn hình
+        nhỏ (< 5 inch) và tablet; một số layout có thể bị tràn văn bản.
+  \item \textbf{Các biến tùy chỉnh cố định}: Các hệ số môi trường
+        ($K$, $K_x$, $k_d$, $k_f$, \ldots) được cố định theo Phương án~2;
+        người dùng không thể thay đổi cho bài toán khác.
+\end{itemize}
+
+\section{Hướng Phát triển}
+\label{sec:conclusion-future}
+
+\begin{itemize}
+  \item \textbf{Mở rộng module tính toán}: Bổ sung tính toán trục, ổ lăn và vỏ hộp giảm tốc,
+        hoàn thiện toàn bộ quy trình thiết kế hệ dẫn động cơ khí.
+  \item \textbf{Hỗ trợ đa phương án}: Cho phép người dùng thay đổi các hệ số
+        thiết kế tùy chỉnh và chọn nhiều đề bài khác nhau,
+        không chỉ giới hạn ở Phương án~2.
+  \item \textbf{Mở rộng catalog động cơ}: Thêm các series động cơ phổ biến
+        khác và cập nhật catalog theo tiêu chuẩn IE4, IE5.
+  \item \textbf{Xuất báo cáo PDF}: Tích hợp chức năng xuất kết quả ra file PDF
+        theo định dạng chuẩn báo cáo đồ án của Khoa Cơ Kỹ Thuật.
+  \item \textbf{So sánh và tối ưu phương án}: Cho phép tính nhiều phương án
+        song song và so sánh chi phí, trọng lượng để chọn phương án tối ưu;
+        tích hợp gợi ý AI để hỗ trợ quá trình lựa chọn.
+  \item \textbf{Đồng bộ offline-online}: Cải thiện cơ chế đồng bộ phiên tính toán
+        giữa thiết bị và backend, hỗ trợ làm việc offline và tự động đồng bộ
+        khi có kết nối mạng trở lại.
+\end{itemize}

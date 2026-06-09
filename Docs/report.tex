@@ -1,0 +1,67 @@
+% Báo cáo Đồ án Đa ngành - Hướng Công nghệ Phần mềm
+% Mobile App hỗ trợ tính toán cơ kỹ thuật: Động cơ, Xích, Bánh răng
+\documentclass[twoside,final]{hcmut-report}
+\usepackage{codespace}
+
+% Encodings
+\usepackage{gensymb,textcomp}
+
+% Better tables
+\usepackage{array,longtable,multicol,multirow,siunitx,tabularx}
+
+% Better enum
+\usepackage{enumitem}
+
+% Graphics
+\usepackage{caption,float}
+\usepackage[export]{adjustbox}
+
+% Diagrams (TikZ)
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning}
+
+% References
+\usepackage[nameinlink]{cleveref}
+
+% Configurations
+\coursename{ĐỒ ÁN ĐA NGÀNH}
+\reporttype{Báo cáo Đồ án Đa ngành -- Hướng Công nghệ Phần mềm}
+\title{\textbf{Ứng dụng Di động Hỗ trợ Tính toán Thiết kế Hệ thống Dẫn động Cơ khí}}
+\advisor{& Nguyễn Quốc Minh &}
+\stuname{%
+  & Nguyễn Tấn Đạt & 2352234 \\
+  & Trần Nguyên Anh & 2352069 \\
+  & Nguyễn Hồng Huy & 2352392 \\
+  & Nguyễn Xuân Hoài & 2352345 
+}
+
+\AtBeginDocument{\renewcommand*{\chaptername}{Chương}}
+
+\begin{document}
+\coverpage%
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+\clearpage
+\input{chapters/c1_introduction/introduction}
+\clearpage
+\input{chapters/c2_overview/overview}
+\clearpage
+\input{chapters/c3_requirements/requirements}
+\clearpage
+\input{chapters/c4_design/design}
+\clearpage
+\input{chapters/c5_implementation/implementation}
+\clearpage
+\input{chapters/c6_testing/testing}
+\clearpage
+\input{chapters/c7_conclusion/conclusion}
+\clearpage
+
+\bibliographystyle{plain}
+\bibliography{refs/references}
+\nocite{*}
+
+\end{document}
